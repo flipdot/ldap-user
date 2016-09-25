@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+
+{% if session.username %}
+  <h1>Hello {{ username }}!</h1>
+    {#
+    {%  for key, value in dict.iteritems() %}
+        {% for x in value %}
+            {{ key }}:<input value="{{ x }}"><br />
+        {% endfor %}
+    {% endfor %}
+    #}
+    {% from "_formhelper.html" import render_field %}
+    <form action="{{ url_for('user') }}" method="post">
+        {{ render_field(form.uid) }}
+        {{ render_field(form.mail) }}
+        {{ render_field(form.sshKey1) }}
+        {{ render_field(form.sshKey2) }}
+
+        {{ render_field(form.oldPassword) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.confirm) }}
+        <input type="submit">
+    </form>
+{% else %}
+  <h1>Hello World!</h1>
+{% endif %}
+
+{% endblock %}

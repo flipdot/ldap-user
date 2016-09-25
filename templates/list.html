@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}List members{% endblock %}
+
+{% block content %}
+    {% if session.username %}
+        <h1>Hello {{ username }}!</h1>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>uid</th>
+                <th>sammynick&trade;</th>
+                <th>mail</th>
+                <th>uidNumber</th>
+                <th>#ssh keys</th>
+            </tr>
+        </thead>
+        {%  for user in users %}
+            <tr>
+                <td>{{ user[1].uid[0] }}</td>
+                <td>{{ (user[1].cn or [''])[0] }}</td>
+                <td>{{ (user[1].mail or [''])[0] }}</td>
+                <td>{{ (user[1].uidNumber or ['none'])[0]  }}</td>
+                <td>{{ (user[1].sshPublicKey|length) or '0' }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
+
+
