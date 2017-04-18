@@ -58,7 +58,7 @@ def login():
         else:
             session.pop('username', None)
 
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
 
 @app.route('/logout')
@@ -92,7 +92,7 @@ def get(list, index, default=''):
         except IndexError:
             return default
 
-app.secret_key = config.SECRET
 
 if __name__ == '__main__':
+    app.secret_key = config.SECRET
     app.run()
