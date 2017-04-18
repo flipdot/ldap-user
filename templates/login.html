@@ -4,8 +4,8 @@
 
 {% block content %}
     <form action="{{ url_for('login') }}" method="post">
-        <input type="text" name="uid" />
-        <input type="password" name="password" />
-        <input type="submit">
+        UID:<input type="text" name="uid" /><br />
+        PWD: <input type="password" name="password" /><br />
+        <input type="submit" value="login">
     </form>
 {% endblock %}
