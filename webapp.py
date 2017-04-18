@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 from flask import Flask, session, redirect, url_for, request, render_template
 import config
 import copy
@@ -5,7 +6,6 @@ from flipdotuser import *
 from LdapForm import *
 
 app = Flask(__name__)
-
 
 @app.route('/')
 def index():
