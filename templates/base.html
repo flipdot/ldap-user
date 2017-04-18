@@ -3,19 +3,26 @@
 <head>
     {% block head %}{% endblock %}
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{% block title %}{% endblock %} - flipdot ldap</title>
+    <link href="/static/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/select2.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="header">
+    <div class="container" id="header">
         {% if session.username %}
-            <a href="/logout">Logout</a>
+            <a class="btn btn-warning" href="/logout">Logout</a>
         {% else %}
 
         {% endif %}
     </div>
-    <div id="content">
+    <div class="container" id="content">
         {% block content %}{% endblock %}
     </div>
 
+    <script src="/static/jquery-3.1.1.slim.min.js"></script>
+    <script src="/static/tether.min.js"></script>
+    <script src="/static/bootstrap.min.js"></script>
+    <script src="/static/select2.min.js"></script>
 </body>
 </html>
