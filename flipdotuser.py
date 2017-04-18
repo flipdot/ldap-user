@@ -62,6 +62,7 @@ class FlipdotUser:
         con.unbind()
 
     def createUser(self, uid, sammyNick, mail, pwd):
+        new_uid = self.get_new_uid()
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
 
         dn = config.LDAP_USER_DN.format(ldap.filter.escape_filter_chars(sammyNick))
@@ -73,7 +74,7 @@ class FlipdotUser:
         attrs['sn'] = ldap.filter.escape_filter_chars(sammyNick)
         attrs['mail'] = ldap.filter.escape_filter_chars(mail)
         #TODO uidNumber autoincrement?
-        attrs['uidNumber'] = '9999'
+        attrs['uidNumber'] = str(new_uid)
         attrs['gidNumber'] = config.LDAP_MEMBER_GID
         attrs['homeDirectory'] = ldap.filter.escape_filter_chars('/home/{:s}'.format(uid))
 
@@ -82,3 +83,14 @@ class FlipdotUser:
         con.add_s(dn, ldif)
         con.passwd_s(dn, pwd)
         con.unbind_s()
+
+    def get_new_uid(self):
+        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
+        base_dn = "ou=members,dc=flipdot,dc=org"
+        filter = '(&(objectclass=*))'
+        attrs = ['uidNumber']
+        user = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
+
+        last = sorted(user, key=lambda tup: int(tup[1].get('uidNumber', ['0'])[0]), reverse=True)[0]
+        con.unbind()
+        return int(last[1]['uidNumber'][0])+1
