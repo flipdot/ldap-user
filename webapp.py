@@ -7,6 +7,7 @@ from LdapForm import *
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     if 'username' in session:
@@ -19,31 +20,41 @@ def index():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     form = LdapForm(request.form)
+    dn, data = FlipdotUser().getuser(session['username'])
     if request.method == "POST":
         if not form.validate():
             return render_template('index.html', form=form)
 
-        dn, data = FlipdotUser().getuser(session['username'])
         new = copy.deepcopy(data)
 
         new['sshPublicKey'][0] = form.sshKey1.data.encode('ascii', 'ignore')
-        new['sshPublicKey'][1] = form.sshKey2.data.encode('ascii', 'ignore')
+        new['cn'][0] = form.sammyNick.data.encode('ascii', 'ignore')
+        new['uid'][0] = form.uid.data.encode('ascii', 'ignore')
+        new.setdefault('mail', [''])[0] = (form.mail.data.encode('ascii', 'ignore'))
+        new.setdefault('sshPublicKey', ['', ''])[0] = (form.sshKey1.data.encode('ascii', 'ignore'))
+        new['sshPublicKey'][1] = (form.sshKey2.data.encode('ascii', 'ignore'))
+
+        # remove empty fields
+        new['sshPublicKey'] = [x for x in new['sshPublicKey'] if len(x) > 0]
 
         if form.password.data != '':
-            oldPw = form.oldPassword.data.encode('ascii', 'ignore')
-            newPw = form.password.data.encode('ascii', 'ignore')
+            old_pw = form.oldPassword.data.encode('ascii', 'ignore')
+            new_pw = form.password.data.encode('ascii', 'ignore')
             print("update pw")
-            FlipdotUser().setPasswd(dn, oldPw, newPw)
+            FlipdotUser().setPasswd(dn, old_pw, new_pw)
 
         FlipdotUser().setuserdata(dn, data, new)
 
         return redirect(url_for('user'))
 
-    dn, data = FlipdotUser().getuser(session['username'])
     form.uid.data = data['uid'][0]
+    form.sammyNick.data = data['cn'][0]
     form.sshKey1.data = get(data.get('sshPublicKey', ['']), 0)
     form.sshKey2.data = get(data.get('sshPublicKey', ['']), 1)
     form.mail.data = data.get('mail', [''])[0]
+    form.password.data = ""
+    form.oldPassword.data = ""
+    form.confirm.data = ""
     return render_template('index.html', form=form)
 
 
@@ -87,10 +98,10 @@ def add():
 
 
 def get(list, index, default=''):
-        try:
-            return list[index]
-        except IndexError:
-            return default
+    try:
+        return list[index]
+    except IndexError:
+        return default
 
 
 if __name__ == '__main__':
