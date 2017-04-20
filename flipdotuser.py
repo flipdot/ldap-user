@@ -3,6 +3,7 @@ import ldap.modlist as modlist
 import ldap.filter
 import os
 import re
+
 import config
 
 '''
@@ -35,25 +36,28 @@ class FlipdotUser:
         except Exception as e:
             raise e
 
-    def getusers(self, uidFilter):
+    def getusers(self, filter):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
         base_dn = "ou=members,dc=flipdot,dc=org"
-        filter = '(&(objectclass=person) (cn={:s}))'.format(ldap.filter.escape_filter_chars(uidFilter))
         attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'uidNumber']
         user = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
         con.unbind()
         return user
 
-
     def getuser(self, uid):
         r = re.match("cn=(.*),ou=.*", uid)
-        user = self.getusers(r.group(1))
+        search_filter = '(&(objectclass=person) (cn={:s}))'.format(ldap.filter.escape_filter_chars(r.group(1)))
+        user = self.getusers(search_filter)
         return user[0]
+
+    def get_all_users(self):
+        search_filter = '(&(objectclass=person))'
+        return self.getusers(search_filter)
 
     def setuserdata(self, dn, old, new):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
         ldif = modlist.modifyModlist(old, new)
-        con.modify_s(dn, ldif)
+        res_type, res_data = con.modify_s(dn, ldif)
         con.unbind()
 
     def setPasswd(self, dn, old, new):

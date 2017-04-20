@@ -80,7 +80,7 @@ def logout():
 
 @app.route('/list')
 def list():
-    user_list = FlipdotUser().getusers('*')
+    user_list = FlipdotUser().get_all_users()
     return render_template('list.html', users=user_list)
 
 
