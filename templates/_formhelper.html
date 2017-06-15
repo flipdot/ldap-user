@@ -1,6 +1,6 @@
 {% macro render_field(field) %}
   <div class="form-group">
-    <label for="{{field.id}}" class="">
+    <label for="{{field.id}}">
       {{ field.label }}
     </label>
     {% if field.type == "PasswordField" %}
@@ -35,8 +35,8 @@
 
 {% macro render_list_field(field) %}
     <div class="form-group">
-        <label for="{{field.id}}" class="">
-            {{ field.entry.id }} dasd
+        <label for="{{field.id}}">
+            {{ field.entry.id }}
         </label>
         <input class="form-control" id="{{field.entry.id}}" name="{{field.entry.id}}"
             type="text" value="{{field.entry.data}}" />
