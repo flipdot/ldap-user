@@ -1,32 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    {% block head %}{% endblock %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{% block title %}{% endblock %} - flipdot ldap</title>
-    <link href="/static/bootstrap.min.css" rel="stylesheet" />
-    <link href="/static/select2.min.css" rel="stylesheet" />
-</head>
-<body>
-    <div class="container" id="header">
-        {% if session.username %}
-            <a class="btn btn-default" href="{{ url_for('index') }}">Edit</a>
-            <a class="btn btn-default" href="{{ url_for('add') }}">Add user</a>
-            <a class="btn btn-default" href="{{ url_for('list') }}">List users</a>
-            <a class="btn btn-warning" href="{{ url_for('logout') }}">Logout</a>
 
-        {% else %}
+{% block head %}{% endblock %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>{% block title %}{% endblock %} - flipdot ldap</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/font-awesome.min.css">
 
-        {% endif %}
-    </div>
-    <div class="container" id="content">
-        {% block content %}{% endblock %}
-    </div>
+{% if session.username %}
+<nav class="site-header">
+    <a class="navbar-link" href="{{ url_for('index') }}">
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+        Edit
+    </a>
+    <a class="navbar-link" href="{{ url_for('add') }}">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        Add user
+    </a>
+    <a class="navbar-link" href="{{ url_for('list') }}">
+        <i class="fa fa-list-ul" aria-hidden="true"></i>
+        List users
+    </a>
+    <a class="navbar-link" href="{{ url_for('logout') }}">
+        <i class="fa fa-sign-out" aria-hidden="true"></i>
+        Logout
+    </a>
+</nav>
+{% endif %}
 
-    <script src="/static/jquery-3.1.1.slim.min.js"></script>
-    <script src="/static/tether.min.js"></script>
-    <script src="/static/bootstrap.min.js"></script>
-    <script src="/static/select2.min.js"></script>
-</body>
-</html>
+<div class="site-content">
+    {% block content %}{% endblock %}
+</div>

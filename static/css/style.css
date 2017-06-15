@@ -1,0 +1,110 @@
+/* general */
+@font-face {
+    font-family: 'Roboto';
+    src: url('/static/fonts/Roboto-Regular.woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/static/fonts/Roboto-Medium.woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/static/fonts/Roboto-Bold.woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/static/fonts/Roboto-Light.woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+html {
+    box-sizing: border-box;
+    font-family: 'Roboto';
+
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: .5em 1em;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+/* navbar / header */
+.site-header {
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-link {
+    display: block;
+    margin: .75em 1.5em;
+    padding: .5em 1em;
+
+    color: #333;
+    text-decoration: none !important;
+    font-weight: 500; /* medium */
+    border-bottom: solid 3px #F5C600;
+
+    transition: all .2s;
+}
+
+.navbar-link:hover {
+    color: #111;
+    border-bottom-color: #C4201C;
+}
+
+/* content */
+.small {
+    font-size: 50%;
+    font-weight: normal;
+}
+
+/* - form elements - */
+/*button,
+input[type='text'],
+input[type='password'] {
+    outline: none;
+    border: none;
+
+    color: #F5C600;
+    background-color: #111;
+}
+
+button {
+    border-radius: 3px;
+}
+
+button.submit-btn {
+
+}*/
+
+.form-group {
+    margin: 1em 0;
+}
+
+.form-group > label {
+    display: block;
+    margin-bottom: .1em;
+    font-weight: 300;
+}
+
+input[type='text'],
+input[type='password'] {
+    width: 20em;
+}

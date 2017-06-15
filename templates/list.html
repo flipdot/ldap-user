@@ -9,14 +9,14 @@
     <table>
         <thead>
             <tr>
-                <th>uid</th>
-                <th>sammynick&trade;</th>
-                <th>mail</th>
-                <th>uidNumber</th>
-                <th>#ssh keys</th>
+                <th>Name</th>
+                <th>BananaNick&trade;</th>
+                <th>Email</th>
+                <th>ID number</th>
+                <th># SSH Keys</th>
             </tr>
         </thead>
-        {%  for user in users %}
+        {% for user in users %}
             <tr>
                 <td>{{ user[1].uid[0] }}</td>
                 <td>{{ (user[1].cn or [''])[0] }}</td>
@@ -27,6 +27,3 @@
         {% endfor %}
     </table>
 {% endblock %}
-
-
-
