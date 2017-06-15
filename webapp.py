@@ -25,28 +25,17 @@ def user():
     except FrontendError as e:
         return render_template("error.html", message=e.message)
 
-
-
-
     if request.method == "POST" and request.form.get('submit', '') == 'submit':
         if not form.validate():
             return render_template('index.html', form=form)
 
         new = copy.deepcopy(data)
 
-        #new['sshPublicKey'][0] = form.sshKey1.data.encode('ascii', 'ignore')
         new['cn'][0] = form.sammyNick.data.encode('ascii', 'ignore')
         new['uid'][0] = form.uid.data.encode('ascii', 'ignore')
         new.setdefault('mail', [''])[0] = (form.mail.data.encode('ascii', 'ignore'))
 
         new['sshPublicKey'] = [x.entry.data.encode('ascii', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
-        #for sshKey in form.sshKeys:
-
-        #new.setdefault('sshPublicKey', ['', ''])[0] = (form.sshKey1.data.encode('ascii', 'ignore'))
-        #new['sshPublicKey'][1] = (form.sshKey2.data.encode('ascii', 'ignore'))
-
-        # remove empty fields
-        #new['sshPublicKey'] = [x for x in new['sshPublicKey'] if len(x) > 0]
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('ascii', 'ignore')
@@ -64,18 +53,15 @@ def user():
         e.delete = False
         form.sshKeys.append_entry(e)
         return render_template('index.html', form=form)
-
+    elif request.method == "POST" and request.form.get('submit', '') == 'addMAC':
+        e = ListMacForm()
+        e.entry = ""
+        e.delete = False
+        form.macs.append_entry(e)
+        return render_template('index.html', form=form)
     elif request.method == "POST":
-        #form.sshKeys.data = filter(lambda x: not x['delete'], form.sshKeys.data)
-
-        list = []
-        for x in range(0, len(form.sshKeys.data)):
-            key = form.sshKeys.pop_entry()
-            if not key.data['delete']:
-                list.append(key)
-
-        for x in list[::-1]:
-            form.sshKeys.append_entry(x.data)
+        remove_deleted_entry(form.sshKeys)
+        remove_deleted_entry(form.macs)
 
         return render_template('index.html', form=form)
 
@@ -87,9 +73,9 @@ def user():
         e.delete = False
         form.sshKeys.append_entry(e)
 
-    for key in data.get('macAddress', []):
+    for addr in data.get('macAddress', []):
         e = ListMacForm()
-        e.entry = key
+        e.entry = addr
         e.delete = False
         form.macs.append_entry(e)
 
@@ -98,6 +84,16 @@ def user():
     form.oldPassword.data = ""
     form.confirm.data = ""
     return render_template('index.html', form=form)
+
+
+def remove_deleted_entry(form_list):
+    tmp = []
+    for x in range(0, len(form_list.data)):
+        key = form_list.pop_entry()
+        if not key.data['delete']:
+            tmp.append(key)
+    for x in tmp[::-1]:
+        form_list.append_entry(x.data)
 
 
 @app.route('/login', methods=['POST'])

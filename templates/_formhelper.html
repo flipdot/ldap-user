@@ -32,3 +32,14 @@
     {% endif %}
   </div>
 {% endmacro %}
+
+{% macro render_list_field(field) %}
+    <div class="form-group">
+        <label for="{{field.id}}" class="">
+            {{ field.entry.id }} dasd
+        </label>
+        <input class="form-control" id="{{field.entry.id}}" name="{{field.entry.id}}"
+            type="text" value="{{field.entry.data}}" />
+        {{ field.delete }}
+    </div>
+{% endmacro %}

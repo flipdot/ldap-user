@@ -3,7 +3,7 @@
 {% block title %}Index{% endblock %}
 {% block content %}
   {% if session.username %}
-      <h1>Hello {{ username }}!</h1>
+      <h1>Hello {{ form.uid.data }}!</h1>
       <h3>Here, you can edit yourself.</h3>
       <p style="font-size:xx-small">
         Why would you want to do that
@@ -19,10 +19,11 @@
             {% for sshKey in form.sshKeys %}
                 {{ render_field(sshKey) }}
             {% endfor %}
+            <button type="submit" value="addSSH" class="btn" name="submit"><span class="glyphicon glyphicon-plus"></span> Add key</button>
             {% for mac in form.macs %}
-                {{ render_field(mac) }}
+                {{ render_list_field(mac) }}
             {% endfor %}
-            <button type="submit" value="addSSH" class="btn" name="submit"><span class="glyphicon glyphicon-plus"></span> Add</button>
+            <button type="submit" value="addMAC" class="btn" name="submit"><span class="glyphicon glyphicon-plus"></span> Add mac</button>
         </div>
         <div class="col-md-6">
             {{ render_field(form.oldPassword) }}
