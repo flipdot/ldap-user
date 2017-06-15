@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
 from flask import Flask, session, redirect, url_for, request, render_template
-import config
 import copy
 from flipdotuser import *
 from LdapForm import *
+
 
 app = Flask(__name__)
 
@@ -20,22 +20,33 @@ def index():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     form = LdapForm(request.form)
-    dn, data = FlipdotUser().getuser(session['username'])
-    if request.method == "POST":
+    try:
+        dn, data = FlipdotUser().getuser(session['username'])
+    except FrontendError as e:
+        return render_template("error.html", message=e.message)
+
+
+
+
+    if request.method == "POST" and request.form.get('submit', '') == 'submit':
         if not form.validate():
             return render_template('index.html', form=form)
 
         new = copy.deepcopy(data)
 
-        new['sshPublicKey'][0] = form.sshKey1.data.encode('ascii', 'ignore')
+        #new['sshPublicKey'][0] = form.sshKey1.data.encode('ascii', 'ignore')
         new['cn'][0] = form.sammyNick.data.encode('ascii', 'ignore')
         new['uid'][0] = form.uid.data.encode('ascii', 'ignore')
         new.setdefault('mail', [''])[0] = (form.mail.data.encode('ascii', 'ignore'))
-        new.setdefault('sshPublicKey', ['', ''])[0] = (form.sshKey1.data.encode('ascii', 'ignore'))
-        new['sshPublicKey'][1] = (form.sshKey2.data.encode('ascii', 'ignore'))
+
+        new['sshPublicKey'] = [x.entry.data.encode('ascii', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
+        #for sshKey in form.sshKeys:
+
+        #new.setdefault('sshPublicKey', ['', ''])[0] = (form.sshKey1.data.encode('ascii', 'ignore'))
+        #new['sshPublicKey'][1] = (form.sshKey2.data.encode('ascii', 'ignore'))
 
         # remove empty fields
-        new['sshPublicKey'] = [x for x in new['sshPublicKey'] if len(x) > 0]
+        #new['sshPublicKey'] = [x for x in new['sshPublicKey'] if len(x) > 0]
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('ascii', 'ignore')
@@ -47,10 +58,41 @@ def user():
 
         return redirect(url_for('user'))
 
+    elif request.method == "POST" and request.form.get('submit', '') == 'addSSH':
+        e = ListSSHForm()
+        e.entry = ""
+        e.delete = False
+        form.sshKeys.append_entry(e)
+        return render_template('index.html', form=form)
+
+    elif request.method == "POST":
+        #form.sshKeys.data = filter(lambda x: not x['delete'], form.sshKeys.data)
+
+        list = []
+        for x in range(0, len(form.sshKeys.data)):
+            key = form.sshKeys.pop_entry()
+            if not key.data['delete']:
+                list.append(key)
+
+        for x in list[::-1]:
+            form.sshKeys.append_entry(x.data)
+
+        return render_template('index.html', form=form)
+
     form.uid.data = data['uid'][0]
     form.sammyNick.data = data['cn'][0]
-    form.sshKey1.data = get(data.get('sshPublicKey', ['']), 0)
-    form.sshKey2.data = get(data.get('sshPublicKey', ['']), 1)
+    for key in data.get('sshPublicKey', []):
+        e = ListSSHForm()
+        e.entry = key
+        e.delete = False
+        form.sshKeys.append_entry(e)
+
+    for key in data.get('macAddress', []):
+        e = ListMacForm()
+        e.entry = key
+        e.delete = False
+        form.macs.append_entry(e)
+
     form.mail.data = data.get('mail', [''])[0]
     form.password.data = ""
     form.oldPassword.data = ""
@@ -63,7 +105,10 @@ def login():
     if request.method == 'POST':
         uid = request.form.get('uid', '')
         pwd = request.form.get('password', '')
-        valid, dn = FlipdotUser().login(uid, pwd)
+        try:
+            valid, dn = FlipdotUser().login(uid, pwd)
+        except FrontendError as e:
+            return render_template("error.html", message=e.message)
         if valid:
             session['username'] = dn
         else:
@@ -107,3 +152,12 @@ def get(list, index, default=''):
 if __name__ == '__main__':
     app.secret_key = config.SECRET
     app.run()
+
+
+class Error(Exception):
+    pass
+
+class FrontendError(Error):
+
+    def __init__(self, message):
+        self.message = message

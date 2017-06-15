@@ -11,7 +11,11 @@
 <body>
     <div class="container" id="header">
         {% if session.username %}
-            <a class="btn btn-warning" href="/logout">Logout</a>
+            <a class="btn btn-default" href="{{ url_for('index') }}">Edit</a>
+            <a class="btn btn-default" href="{{ url_for('add') }}">Add user</a>
+            <a class="btn btn-default" href="{{ url_for('list') }}">List users</a>
+            <a class="btn btn-warning" href="{{ url_for('logout') }}">Logout</a>
+
         {% else %}
 
         {% endif %}

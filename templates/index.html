@@ -9,14 +9,20 @@
         Why would you want to do that
       </p>
     {% from "_formhelper.html" import render_field %}
+    {% from "_formhelper.html" import render_list_field %}
     <form action="{{ url_for('user') }}" method="post">
       <div class="row">
         <div class="col-md-6">
             {{ render_field(form.uid) }}
             {{ render_field(form.sammyNick) }}
             {{ render_field(form.mail) }}
-            {{ render_field(form.sshKey1) }}
-            {{ render_field(form.sshKey2) }}
+            {% for sshKey in form.sshKeys %}
+                {{ render_field(sshKey) }}
+            {% endfor %}
+            {% for mac in form.macs %}
+                {{ render_field(mac) }}
+            {% endfor %}
+            <button type="submit" value="addSSH" class="btn" name="submit"><span class="glyphicon glyphicon-plus"></span> Add</button>
         </div>
         <div class="col-md-6">
             {{ render_field(form.oldPassword) }}
@@ -24,7 +30,7 @@
             {{ render_field(form.confirm) }}
         </div>
       </div>
-      <button type="submit" class="btn btn-success form-control">
+      <button type="submit" value="submit" name="submit" class="btn btn-success form-control">
         Save!
       </button>
     </form>
