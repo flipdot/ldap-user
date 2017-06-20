@@ -1,45 +1,44 @@
 {% macro render_field(field) %}
-  <div class="form-group">
-    <label for="{{field.id}}">
-      {{ field.label }}
-    </label>
-    {% if field.type == "PasswordField" %}
-      <input class="form-control" id="{{field.id}}" name="{{field.id}}"
-        type="password" value="{{field.data}}" />
-    {% elif field.type == "FormField" %}
-        <input class="form-control" id="{{field.entry.id}}" name="{{field.entry.id}}"
-        type="text" value="{{field.entry.data}}" />
-        {{ field.delete }}
-    {% elif field.type == "FieldList" %}
-        <input class="form-control" id="{{field.entry.id}}" name="{{field.entry.id}}"
-        type="text" value="{{field.entry.data}}" /><button>bliubg</button>
-    {% else %}
-      <input class="form-control" id="{{field.id}}" name="{{field.id}}"
-        type="text" value="{{field.data}}" />
-    {% endif %}
-    {% if field.errors %}
-      <ul class=errors>
-      {% if field.type == "FormField" %}
-          {% for error in field.entry.errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-      {% else %}
-          {% for error in field.errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-      {% endif %}
-      </ul>
-    {% endif %}
-  </div>
+    <div class="form-group">
+        {{ field.label }}
+        {% if field.type == "PasswordField" %}
+            <input id="{{field.id}}" name="{{field.id}}" type="password"
+                value="{{field.data}}" />
+        {% elif field.type == "FormField" %}
+            <input id="{{field.entry.id}}" name="{{field.entry.id}}"
+                type="text" value="{{field.entry.data}}" />
+            {{ field.delete }}
+        {% elif field.type == "FieldList" %}
+            <input id="{{field.entry.id}}" name="{{field.entry.id}}"
+                type="text" value="{{field.entry.data}}" />
+            <button>bliubg</button>
+        {% else %}
+            <input id="{{field.id}}" name="{{field.id}}" type="text"
+                value="{{field.data}}" />
+        {% endif %}
+        {% if field.errors %}
+            <ul class="errors">
+            {% if field.type == "FormField" %}
+                {% for error in field.entry.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% else %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endif %}
+            </ul>
+        {% endif %}
+    </div>
 {% endmacro %}
 
 {% macro render_list_field(field) %}
-    <div class="form-group">
-        <label for="{{field.id}}">
-            {{ field.entry.id }}
-        </label>
-        <input class="form-control" id="{{field.entry.id}}" name="{{field.entry.id}}"
-            type="text" value="{{field.entry.data}}" />
-        {{ field.delete }}
-    </div>
+<div class="form-group">
+    <label for="{{field.id}}">
+        {{ field.entry.id }}
+    </label>
+    <input id="{{field.entry.id}}" name="{{field.entry.id}}"
+        type="text" value="{{field.entry.data}}" />
+    {{ field.delete }}
+</div>
 {% endmacro %}

@@ -3,10 +3,7 @@
 {% block title %}List members{% endblock %}
 
 {% block content %}
-    {% if session.username %}
-        <h1>Hello {{ username }}!</h1>
-    {% endif %}
-    <table>
+    <table class="user-list">
         <thead>
             <tr>
                 <th>Name</th>
