@@ -36,6 +36,7 @@ def user():
         new.setdefault('mail', [''])[0] = (form.mail.data.encode('ascii', 'ignore'))
 
         new['sshPublicKey'] = [x.entry.data.encode('ascii', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
+        new['macAddress'] = [x.entry.data.encode('ascii', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('ascii', 'ignore')
@@ -157,3 +158,4 @@ class FrontendError(Error):
 
     def __init__(self, message):
         self.message = message
+

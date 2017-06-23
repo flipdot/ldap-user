@@ -43,10 +43,11 @@ class FlipdotUser:
     def getusers(self, filter):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
         base_dn = "ou=members,dc=flipdot,dc=org"
-        attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'uidNumber', 'macAddress']
+        attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'uidNumber', 'macAddress', 'objectclass']
         user = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
         con.unbind()
         return user
+
 
     def getuser(self, uid):
         r = re.match("cn=(.*),ou=.*", uid)
@@ -54,22 +55,46 @@ class FlipdotUser:
         user = self.getusers(search_filter)
         return user[0]
 
+
     def get_all_users(self):
         search_filter = '(&(objectclass=person))'
         users = self.getusers(search_filter)
         reverse_users = sorted(users, key=lambda tup: int(tup[1].get('uidNumber', ['0'])[0]), reverse=True)
         return reverse_users
 
+
     def setuserdata(self, dn, old, new):
+        all_classes = self.ensure_object_classes({})
+        user = self.getuser(dn)
+
+        add_object_classes = []
+        for c in all_classes['objectclass']:
+          if not c in user[1]['objectClass']:
+            add_object_classes.append(c)
+
+
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
+
+        # ensure object classes
+        con.modify_s(dn, modlist.modifyModlist({}, {'objectClass':add_object_classes}))
+
+        # safe new attribtes
         ldif = modlist.modifyModlist(old, new)
-        res_type, res_data = con.modify_s(dn, ldif)
+        con.modify_s(dn, ldif)
+
         con.unbind()
 
     def setPasswd(self, dn, old, new):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
         con.passwd_s(dn, old, new)
         con.unbind()
+
+
+    def ensure_object_classes(self, attrs):
+        attrs['objectclass'] = ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
+                                'person', 'posixAccount', 'ieee802Device']
+        return attrs
+
 
     def createUser(self, uid, sammyNick, mail, pwd):
         new_uid = self.get_new_uid()
@@ -78,8 +103,7 @@ class FlipdotUser:
         dn = config.LDAP_USER_DN.format(ldap.filter.escape_filter_chars(sammyNick))
 
         attrs = {}
-        attrs['objectclass'] = ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
-                                'person', 'posixAccount']
+        self.ensure_object_classes(attrs)
         attrs['uid'] = ldap.filter.escape_filter_chars(uid)
         attrs['sn'] = ldap.filter.escape_filter_chars(sammyNick)
         attrs['mail'] = ldap.filter.escape_filter_chars(mail)
@@ -98,3 +122,4 @@ class FlipdotUser:
 
         last = users[0]
         return int(last[1]['uidNumber'][0])+1
+
