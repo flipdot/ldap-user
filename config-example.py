@@ -5,3 +5,5 @@ LDAP_ADMIN_DN = "cn=admin,dc=flipdot,dc=org"
 LDAP_ADMIN_PW = "password"
 
 LDAP_MEMBER_GID = "10000"
+
+LOG_FILE = "/var/log/ldap-webapp.log"

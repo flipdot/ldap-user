@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 from flask import Flask, session, redirect, url_for, request, render_template
 import copy
+import config
 from flipdotuser import *
 from LdapForm import *
 import sys
@@ -9,6 +10,12 @@ sys.setdefaultencoding('utf-8')
 
 
 app = Flask(__name__)
+if not app.debug:
+    import logging
+    from logging import FileHandler
+    file_handler = FileHandler(config.LOG_FILE)
+    file_handler.setLevel(logging.WARNING)
+    app.logger.addHandler(file_handler)
 
 
 @app.route('/')
