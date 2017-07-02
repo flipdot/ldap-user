@@ -3,6 +3,9 @@ from flask import Flask, session, redirect, url_for, request, render_template
 import copy
 from flipdotuser import *
 from LdapForm import *
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 app = Flask(__name__)
@@ -31,16 +34,16 @@ def user():
 
         new = copy.deepcopy(data)
 
-        new['cn'][0] = form.sammyNick.data.encode('ascii', 'ignore')
-        new['uid'][0] = form.uid.data.encode('ascii', 'ignore')
-        new.setdefault('mail', [''])[0] = (form.mail.data.encode('ascii', 'ignore'))
+        new['cn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
+        new['uid'][0] = form.uid.data.encode('utf8', 'ignore')
+        new.setdefault('mail', [''])[0] = (form.mail.data.encode('utf8', 'ignore'))
 
-        new['sshPublicKey'] = [x.entry.data.encode('ascii', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
-        new['macAddress'] = [x.entry.data.encode('ascii', 'ignore') for x in form.macs if len(x.entry.data) > 0]
+        new['sshPublicKey'] = [x.entry.data.encode('utf8', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
+        new['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
         if form.password.data != '':
-            old_pw = form.oldPassword.data.encode('ascii', 'ignore')
-            new_pw = form.password.data.encode('ascii', 'ignore')
+            old_pw = form.oldPassword.data.encode('utf8', 'ignore')
+            new_pw = form.password.data.encode('utf8', 'ignore')
             print("update pw")
             FlipdotUser().setPasswd(dn, old_pw, new_pw)
 
@@ -130,10 +133,10 @@ def list():
 def add():
     form = LdapForm(request.form)
     if request.method == 'POST' and form.validate():
-        FlipdotUser().createUser(form.uid.data.encode('ascii', 'ignore'),
-                                 form.sammyNick.data.encode('ascii', 'ignore'),
-                                 form.mail.data.encode('ascii', 'ignore'),
-                                 form.password.data.encode('ascii', 'ignore'))
+        FlipdotUser().createUser(form.uid.data.encode('utf8', 'ignore'),
+                                 form.sammyNick.data.encode('utf8', 'ignore'),
+                                 form.mail.data.encode('utf8', 'ignore'),
+                                 form.password.data.encode('utf8', 'ignore'))
         return redirect(url_for('list'))
 
     return render_template('add.html', form=form)
