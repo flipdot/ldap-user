@@ -43,7 +43,7 @@ class FlipdotUser:
     def getusers(self, filter):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
         base_dn = "ou=members,dc=flipdot,dc=org"
-        attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'uidNumber', 'macAddress', 'objectclass']
+        attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'sn', 'uidNumber', 'macAddress', 'objectclass']
         user = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
         con.unbind()
         return user

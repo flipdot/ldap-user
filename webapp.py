@@ -34,7 +34,7 @@ def user():
 
         new = copy.deepcopy(data)
 
-        new['cn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
+        new['sn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
         new['uid'][0] = form.uid.data.encode('utf8', 'ignore')
         new.setdefault('mail', [''])[0] = (form.mail.data.encode('utf8', 'ignore'))
 
@@ -70,7 +70,7 @@ def user():
         return render_template('index.html', form=form)
 
     form.uid.data = data['uid'][0]
-    form.sammyNick.data = data['cn'][0]
+    form.sammyNick.data = data['sn'][0]
     for key in data.get('sshPublicKey', []):
         e = ListSSHForm()
         e.entry = key
