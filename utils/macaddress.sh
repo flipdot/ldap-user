@@ -1,9 +1,12 @@
 SED_FILE=/tmp/ldap_macs.sed
+
+PASSWORD=$(cat ldapAdminPW.sh)
+
 rm -f $SED_FILE
 macs=()
 IFS_BACKUP=$IFS
 IFS=$'\n'
-for x in `ldapsearch -h rail.fd -D cn=admin,dc=flipdot,dc=org -b ou=members,dc=flipdot,dc=org -w password sn macAddress | grep -v "^#"`; do
+for x in `ldapsearch -h rail.fd -D cn=admin,dc=flipdot,dc=org -b ou=members,dc=flipdot,dc=org -w $PASSWORD sn macAddress | grep -v "^#"`; do
         IFS=$IFS_BACKUP
         if [[ $x =~ ^sn:\ .*$ ]] ; then
                 MACUSER=`echo -n "$x" | sed -rn 's/^sn: (.*)$/\1/p'`
