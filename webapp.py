@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+import subprocess
 from flask import Flask, session, redirect, url_for, request, render_template
 import copy
 import config
@@ -154,6 +155,13 @@ def get(list, index, default=''):
         return list[index]
     except IndexError:
         return default
+
+@app.route('/system/who_is_in_config')
+def who_is_in_config():
+    subprocess.check_output(['bash', '-c', 'cd utils && ./macaddress.sh'])
+    with open("/tmp/ldap_macs.sed", "r") as f:
+        resp = f.read()
+    return resp
 
 
 if __name__ == '__main__':
