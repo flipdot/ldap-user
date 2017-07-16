@@ -158,7 +158,8 @@ def get(list, index, default=''):
 
 @app.route('/system/who_is_in_config')
 def who_is_in_config():
-    subprocess.check_output(['bash', '-c', 'cd utils && ./macaddress.sh'])
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    subprocess.check_output(['bash', '-c', 'cd '+dir_path+'/utils && ./macaddress.sh'])
     with open("/tmp/ldap_macs.sed", "r") as f:
         resp = f.read()
     return resp
