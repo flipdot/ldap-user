@@ -1,6 +1,6 @@
 SED_FILE=/tmp/ldap_macs.sed
 
-PASSWORD=$(cat ldapAdminPW.sh)
+PASSWORD=$(./ldapAdminPW.sh)
 
 rm -f $SED_FILE
 macs=()
