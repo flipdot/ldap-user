@@ -1,4 +1,6 @@
 bash -c "cd .. && python - <<EOF
 import config
-print(config.LDAP_ADMIN_PW)
+import sys
+
+sys.stdout.write(config.LDAP_ADMIN_PW)
 EOF"
