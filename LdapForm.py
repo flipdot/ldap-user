@@ -49,3 +49,11 @@ class LdapForm(Form):
     sshKeys = FieldList(FormField(ListSSHForm))
     macs = FieldList(FormField(ListMacForm))
 
+
+class PasswdForm(Form):
+    password = PasswordField('New Password', [
+        validators.Length(min=6, message="Your password must be 6 characters minimum."),
+        validators.EqualTo('confirm', message='Passwords must match')
+    ])
+    confirm = PasswordField('Repeat Password')
+

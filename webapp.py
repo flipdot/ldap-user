@@ -4,9 +4,13 @@ import hashlib
 import hmac
 import json
 import subprocess
+from urllib import urlencode
+
+import time
 from flask import Flask, session, redirect, url_for, request, render_template
 import copy
 import config
+import notification
 from flipdotuser import *
 from LdapForm import *
 import sys
@@ -110,7 +114,6 @@ def user():
 
     meta = get_meta(data)
     form.drink_notification.data = meta['drink_notification']
-    print form.drink_notification.choices
     return render_template('index.html', form=form)
 
 def get_meta(data):
@@ -119,7 +122,6 @@ def get_meta(data):
         "drink_notification": "instant",  # instant, daily, weekly, never
         "last_drink_notification": 0,
     }
-    print meta_str
     if meta_str:
         try:
             meta_o = json.loads(meta_str)
@@ -139,7 +141,7 @@ def remove_deleted_entry(form_list):
         form_list.append_entry(x.data)
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
         uid = request.form.get('uid', '')
@@ -152,8 +154,45 @@ def login():
             session['username'] = dn
         else:
             session.pop('username', None)
-
+    elif request.method == 'GET' and request.args.get('token', ''):
+        try:
+            token = request.args.get('token')
+            dn, date, digest = token.split('|')
+            if float(date) + 60*60*24 < time.time():
+                print "expired login token: %s" % (date, time.time())
+                return render_template("error.html", message="Invalid login token")
+            digest_raw = base64.decodestring(digest)
+            dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
+            if hmac.compare_digest(dn_hmac, digest_raw):
+                print 'success'
+                session['username'] = dn
+                session['logged_in_via'] = 'token'
+                form = PasswdForm(request.form)
+                form.password.data = ""
+                form.confirm.data = ""
+                return render_template('reset_password.html', username=dn, form=form)
+            else:
+                return render_template("error.html", message="Invalid login token")
+        except Exception as e:
+            logging.warn(e)
+            print e
+            pass
     return redirect(url_for('index'))
+
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    if session['logged_in_via'] != 'token' or not session['username']:
+        session.clear()
+        return render_template("error.html", message="invalid token")
+    form = PasswdForm(request.form)
+    if request.method == "POST":
+        if not form.validate():
+            return render_template('index.html', form=form)
+        new_pw = form.password.data.encode('utf8', 'ignore')
+        print("update pw")
+        FlipdotUser().setPasswd(session['username'], None, new_pw)
+
+    return redirect(url_for('user'))
 
 @app.route('/forgot_password', methods=['POST'])
 def forgot_password():
@@ -167,16 +206,21 @@ def forgot_password():
     dn = 'cn=%s,ou=members,dc=flipdot,dc=org' % uid
     try:
         ret = FlipdotUser().getuser(dn)
+        mail = ret[1]['mail'][0]
     except FrontendError as e:
         return render_template("error.html", message=e.message)
-    print "Resetting password for %s" % uid
-    dn_hmac = hmac.new(config.SECRET, dn, hashlib.sha256).digest()
-    dn_signed = base64.encodestring(dn_hmac)
-
+    if not mail:
+        return render_template("error.html", message=e.message)
+    print "Resetting password for %s (%s)" % (uid, mail)
+    date = str(time.time())
+    dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
+    dn_signed = dn + "|" + date + "|" + base64.encodestring(dn_hmac).strip()
     msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
-          "http://ldapapp.fd/login/?token="
-
-    # session['username'] = dn
+          "http://ldapapp.fd/login?%s\n" % urlencode({'token': dn_signed})
+    notification.send_notification(mail,
+                                   "[flipdot-noti] Passwort-Reset",
+                                   msg)
+    print msg
     return render_template("error.html", message=message)
 
 @app.route('/logout')
