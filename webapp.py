@@ -1,4 +1,7 @@
 #!/usr/bin/env python2
+import base64
+import hashlib
+import hmac
 import json
 import subprocess
 from flask import Flask, session, redirect, url_for, request, render_template
@@ -152,6 +155,29 @@ def login():
 
     return redirect(url_for('index'))
 
+@app.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    message = "You might have gotten a mail."
+    if request.method != 'POST':
+        return redirect(url_for('index'))
+
+    uid = request.form.get('uid', '')
+    uid = ldap.filter.escape_filter_chars(uid)
+
+    dn = 'cn=%s,ou=members,dc=flipdot,dc=org' % uid
+    try:
+        ret = FlipdotUser().getuser(dn)
+    except FrontendError as e:
+        return render_template("error.html", message=e.message)
+    print "Resetting password for %s" % uid
+    dn_hmac = hmac.new(config.SECRET, dn, hashlib.sha256).digest()
+    dn_signed = base64.encodestring(dn_hmac)
+
+    msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
+          "http://ldapapp.fd/login/?token="
+
+    # session['username'] = dn
+    return render_template("error.html", message=message)
 
 @app.route('/logout')
 def logout():
@@ -195,7 +221,7 @@ def who_is_in_config():
 
 if __name__ == '__main__':
     app.secret_key = config.SECRET
-    app.run()
+    app.run(port=config.PORT)
 
 
 class Error(Exception):

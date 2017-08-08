@@ -161,10 +161,17 @@ select {
     }
 }
 
-.submit-btn {
-    font-size: bigger;
-    width: 100%;
+.submit-btn, .btn {
+    font-size: medium;
+    
     height: 3em;
-    background-color: #9fe09f;
     margin-bottom: 2em;
+    padding: .5em .5em .2em;
+    
+    background-color: #fff;
+    border: 1px solid #666;
+}
+.submit-btn {
+    width: 100%;
+    background-color: #9fe09f;
 }
