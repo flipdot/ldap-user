@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+import json
 import subprocess
 from flask import Flask, session, redirect, url_for, request, render_template
 import copy
@@ -49,6 +50,13 @@ def user():
         new['sshPublicKey'] = [x.entry.data.encode('utf8', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
         new['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
+        meta = get_meta(data)
+        meta['drink_notification'] = form.drink_notification.data
+        meta_str = json.dumps(meta).encode('utf8', 'ignore')
+        if not 'postOfficeBox' in new:
+            new['postOfficeBox'] = [None]
+        new['postOfficeBox'][0] = meta_str
+
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('utf8', 'ignore')
             new_pw = form.password.data.encode('utf8', 'ignore')
@@ -79,6 +87,7 @@ def user():
 
     form.uid.data = data['uid'][0]
     form.sammyNick.data = data['sn'][0]
+
     for key in data.get('sshPublicKey', []):
         e = ListSSHForm()
         e.entry = key
@@ -95,8 +104,27 @@ def user():
     form.password.data = ""
     form.oldPassword.data = ""
     form.confirm.data = ""
+
+    meta = get_meta(data)
+    form.drink_notification.data = meta['drink_notification']
+    print form.drink_notification.choices
     return render_template('index.html', form=form)
 
+def get_meta(data):
+    meta_str = data.get('postOfficeBox', [None])[0]
+    meta = {
+        "drink_notification": "instant",  # instant, daily, weekly, never
+        "last_drink_notification": 0,
+    }
+    print meta_str
+    if meta_str:
+        try:
+            meta_o = json.loads(meta_str)
+            if type(meta_o) == dict:
+                meta = meta_o
+        except:
+            pass
+    return meta
 
 def remove_deleted_entry(form_list):
     tmp = []

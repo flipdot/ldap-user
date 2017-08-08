@@ -8,6 +8,16 @@
             <input id="{{field.entry.id}}" name="{{field.entry.id}}"
                 type="text" value="{{field.entry.data}}" />
             {{ field.delete }}
+        {% elif field.type == "SelectField" %}
+            <select id="{{field.id}}" name="{{field.id}}">
+                {% for option in field.choices %}
+                    <option value="{{option[0]}}"
+                            {% if option[0] == field.data %}selected{% endif %}
+                    >
+                        {{option[1]}}
+                    </option>
+                {% endfor %}
+            </select>
         {% elif field.type == "FieldList" %}
             <input id="{{field.entry.id}}" name="{{field.entry.id}}"
                 type="text" value="{{field.entry.data}}" />

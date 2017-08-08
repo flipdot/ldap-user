@@ -1,4 +1,5 @@
-from wtforms import Form, StringField, PasswordField, FieldList, SubmitField, validators, FormField, ValidationError
+from wtforms import Form, StringField, PasswordField, FieldList, SubmitField, \
+    validators, FormField, ValidationError, SelectField
 from wtforms.fields.html5 import EmailField
 from sshpubkeys import SSHKey, InvalidKeyException
 from wtforms.validators import InputRequired
@@ -29,6 +30,13 @@ class LdapForm(Form):
     sammyNick = StringField('BananaNick', validators=[
         validators.Length(min=4, max=25, message="BananaNick is baad. min: 4, max: 25"),
         validators.DataRequired(message="BanaNick is required!")])
+    drink_notification = SelectField('Drink Notification',
+                                     choices=[
+                                         ("instant", "instant"),
+                                         ("daily", "daily"),
+                                         ("weekly", "weekly"),
+                                         ("never", "never"),
+                                     ])
 
     oldPassword = PasswordField('Old Password')
     password = PasswordField('New Password', [
