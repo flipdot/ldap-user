@@ -206,6 +206,8 @@ def forgot_password():
     dn = 'cn=%s,ou=members,dc=flipdot,dc=org' % uid
     try:
         ret = FlipdotUser().getuser(dn)
+        if not ret:
+            return render_template("error.html", message="User %s not found" % uid)
         mail = ret[1]['mail'][0]
     except FrontendError as e:
         return render_template("error.html", message=e.message)

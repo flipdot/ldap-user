@@ -53,7 +53,7 @@ class FlipdotUser:
         r = re.match("cn=(.*),ou=.*", uid)
         search_filter = '(&(objectclass=person) (cn={:s}))'.format(ldap.filter.escape_filter_chars(r.group(1)))
         user = self.getusers(search_filter)
-        return user[0]
+        return user[0] if user else None
 
 
     def get_all_users(self):

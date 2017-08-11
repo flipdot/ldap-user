@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}Server Error{% endblock %}
+{% block title %}
+    Server Error
+{% endblock %}
 
 {% block content %}
     <h1>Server Error</h1>
-    <div class="error">{{ message }}</div>
+    <p class="error">
+        {{ message }}
+    </p>
+    <p>
+        <a href="{{ url_for('index') }}">go back</a>
+    </p>
 {% endblock %}
