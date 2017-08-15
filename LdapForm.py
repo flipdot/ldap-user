@@ -17,7 +17,6 @@ class ListSSHForm(Form):
     entry = StringField("SSHPublicKey", [InputRequired(), ssh_key_check])
     delete = SubmitField('Delete')
 
-
 class ListMacForm(Form):
     entry = StringField("MAC-Address")
     delete = SubmitField('Delete')
@@ -31,6 +30,7 @@ class LdapForm(Form):
         validators.Length(min=4, max=25, message="BananaNick is baad. min: 4, max: 25"),
         validators.DataRequired(message="BanaNick is required!")])
     drink_notification = SelectField('Drink Notification',
+                                     default='instant',
                                      choices=[
                                          ("instant", "instant"),
                                          ("daily", "daily"),

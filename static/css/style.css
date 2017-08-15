@@ -161,14 +161,16 @@ select {
     }
 }
 
-.submit-btn, .btn {
-    font-size: medium;
+.btn {
+    font-size: large;
     
     height: 3em;
     margin-bottom: 2em;
-    padding: .5em .5em .2em;
+    padding: .1em .3em .1em .3em;
+    line-height: .1em;
     
     background-color: #fff;
+    color: #333;
     border: 1px solid #666;
 }
 .submit-btn {

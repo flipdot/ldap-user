@@ -48,7 +48,14 @@
         {{ field.entry.id }}
     </label>
     <input id="{{field.entry.id}}" name="{{field.entry.id}}"
-        type="text" value="{{field.entry.data}}" />
-    {{ field.delete }}
+    type="text" value="{{field.entry.data}}" />
+    {{ render_delete(field.delete) }}
 </div>
+{% endmacro %}
+
+{% macro render_delete(delete) %}
+    <button id="{{delete.id}}" name="{{delete.id}}"
+        type="submit" value="Delete" class="pull-right btn btn-lg btn-danger">
+        <i class="fa fa-times"></i>
+    </button>
 {% endmacro %}
