@@ -70,7 +70,7 @@ def user():
             print("update pw")
             FlipdotUser().setPasswd(dn, old_pw, new_pw)
 
-        FlipdotUser().setuserdata(dn, data, new)
+        FlipdotUser().setuserdata(dn, data, new, session)
 
         return redirect(url_for('user'))
 
