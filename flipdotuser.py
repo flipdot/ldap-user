@@ -63,7 +63,7 @@ class FlipdotUser:
         return reverse_users
 
 
-    def setuserdata(self, dn, old, new):
+    def setuserdata(self, dn, old, new, session):
         all_classes = self.ensure_object_classes({})
         user = self.getuser(dn)
 
@@ -72,8 +72,17 @@ class FlipdotUser:
           if not c in user[1]['objectClass']:
             add_object_classes.append(c)
 
-
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
+
+        if old['uid'][0] != new['uid'][0] or old['cn'][0] != new['cn'][0] \
+                or old['uid'][0] != new['cn'][0] or old['cn'][0] != new['uid'][0]:
+            old_dn = config.LDAP_USER_DN.format(old['cn'][0])
+            new_dn = config.LDAP_USER_DN.format(new['uid'][0])
+            new_rdn = new_dn.split(',')[0]
+            new_ou = ",".join(new_dn.split(',')[1:])
+            con.rename_s(old_dn, new_rdn, new_ou)
+            dn = new_dn
+            session['username'] = dn
 
         # ensure object classes
         con.modify_s(dn, modlist.modifyModlist({}, {'objectClass':add_object_classes}))

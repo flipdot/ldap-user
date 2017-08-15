@@ -16,7 +16,7 @@
         {% for user in users %}
             <tr>
                 <td>{{ user[1].uid[0] }}</td>
-                <td>{{ (user[1].cn or [''])[0] }}</td>
+                <td>{{ (user[1].sn or [''])[0] }}</td>
                 <td>{{ (user[1].mail or [''])[0] }}</td>
                 <td>{{ (user[1].uidNumber or ['none'])[0]  }}</td>
                 <td>{{ (user[1].sshPublicKey|length) or '0' }}</td>
