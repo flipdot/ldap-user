@@ -86,14 +86,6 @@ td, th {
 }
 
 /* - form elements - */
-/*button {
-    border-radius: 3px;
-}
-
-button.submit-btn {
-
-}*/
-
 .form-group {
     margin: 1.5em 0;
 }
@@ -104,9 +96,22 @@ button.submit-btn {
     font-weight: 300;
 }
 
+.form-list-item {
+    display: flex;
+    align-items: flex-end;
+}
+
+.form-list-item input {
+    margin-right: .5em;
+}
+
+.form-list-item .btn {
+    margin: 0;
+    padding: .1em .3em;
+}
+
 input[type='text'],
 input[type='password'] {
-    min-width: 15em;
     width: 100%;
     padding: .5em .5em .2em;
 
@@ -127,52 +132,56 @@ input[type='password']:focus {
 }
 
 select {
-    min-width: 15em;
     width: 100%;
-    padding: .5em .5em .2em;
+    padding: .4em;
 
-    font-size: 16px;
-    
     border: 1px solid #eee;
     background-color: #fff;
+    color: #333;
 }
 
-.panel {
-    overflow: auto;
-    float: left;
+.edit-user-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.panel:not(:empty) {
     border: 1px solid #eee;
     padding: 0px 15px 15px 15px;
-    margin: 15px;
-    min-height: 22em;
+    margin: .5rem 0;
 }
 
 .panel {
-    width: calc(100% - 30px);
+    width: 100%
 }
 
 @media(min-width: 768px) {
     .panel {
-        width: calc(50% - 30px);
+        /* 2 panels => 1rem space between them */
+        width: calc(50% - 0.5rem);
     }
 }
+
 @media(min-width: 1200px) {
     .panel {
-        width: calc(33.333% - 30px);
+        /* 3 panels => 2rem space overall => 1rem space between each pair */
+        width: calc(33.333% - 0.66rem);
     }
 }
 
 .btn {
     font-size: large;
-    
-    height: 3em;
-    margin-bottom: 2em;
-    padding: .1em .3em .1em .3em;
-    line-height: .1em;
-    
+    cursor: pointer;
+
+    margin: .5rem 0;
+    padding: .4em .6em;
+
     background-color: #fff;
     color: #333;
     border: 1px solid #666;
 }
+
 .submit-btn {
     width: 100%;
     background-color: #9fe09f;

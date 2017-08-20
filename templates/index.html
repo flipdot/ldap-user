@@ -4,6 +4,7 @@
 {% block content %}
     {% if session.username %}
         <h1>Hello {{ form.uid.data }}!</h1>
+
         <h2>
             Here, you can edit yourself.
             <span class="small">Why would you want to do that?</span>
@@ -11,11 +12,13 @@
 
         {% from "_formhelper.html" import render_field %}
         {% from "_formhelper.html" import render_list_field %}
-        <form action="{{ url_for('user') }}" method="post">
+
+        <form class="edit-user-form" action="{{ url_for('user') }}" method="post">
             <button class="btn submit-btn" type="submit" name="submit" value="submit">
                 <i class="fa fa-save" aria-hidden="true"></i>
                 Save
             </button>
+
             <div class="panel">
                 <h3>GECOS</h3>
                 {{ render_field(form.uid) }}
@@ -27,6 +30,7 @@
                 <h3>Email Settings</h3>
                 {{ render_field(form.drink_notification) }}
             </div>
+
             <div class="panel">
                 <h3>SSH Keys</h3>
                 {% for sshKey in form.sshKeys %}
@@ -55,12 +59,15 @@
                 {{ render_field(form.password) }}
                 {{ render_field(form.confirm) }}
             </div>
-            <div class="sticky-footer">
-                <button class="btn submit-btn" type="submit" name="submit" value="submit">
-                    <i class="fa fa-save" aria-hidden="true"></i>
-                    Save
-                </button>
-            </div>
+
+            <!-- fill up the flex layout so we have a multiple of 6 panels -->
+            <!-- empty panels will be completely invisible, but make the layout work -->
+            <div class="panel"></div>
+
+            <button class="btn submit-btn" type="submit" name="submit" value="submit">
+                <i class="fa fa-save" aria-hidden="true"></i>
+                Save
+            </button>
         </form>
     {% else %}
         <h1>Hello World!</h1>

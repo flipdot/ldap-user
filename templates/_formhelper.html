@@ -2,29 +2,29 @@
     <div class="form-group">
         {{ field.label }}
         {% if field.type == "PasswordField" %}
-            <input id="{{field.id}}" name="{{field.id}}" type="password"
-                value="{{field.data}}" />
+            <input id="{{ field.id }}" name="{{ field.id }}" type="password"
+                value="{{ field.data }}" />
         {% elif field.type == "FormField" %}
-            <input id="{{field.entry.id}}" name="{{field.entry.id}}"
-                type="text" value="{{field.entry.data}}" />
+            <input id="{{ field.entry.id }}" name="{{ field.entry.id }}"
+                type="text" value="{{ field.entry.data }}" />
             {{ field.delete }}
         {% elif field.type == "SelectField" %}
-            <select id="{{field.id}}" name="{{field.id}}">
+            <select id="{{ field.id }}" name="{{ field.id }}">
                 {% for option in field.choices %}
-                    <option value="{{option[0]}}"
+                    <option value="{{ option[0] }}"
                             {% if option[0] == field.data %}selected{% endif %}
                     >
-                        {{option[1]}}
+                        {{ option[1] }}
                     </option>
                 {% endfor %}
             </select>
         {% elif field.type == "FieldList" %}
-            <input id="{{field.entry.id}}" name="{{field.entry.id}}"
-                type="text" value="{{field.entry.data}}" />
+            <input id="{{ field.entry.id }}" name="{{ field.entry.id }}"
+                type="text" value="{{ field.entry.data }}" />
             <button>bliubg</button>
         {% else %}
-            <input id="{{field.id}}" name="{{field.id}}" type="text"
-                value="{{field.data}}" />
+            <input id="{{ field.id }}" name="{{ field.id }}" type="text"
+                value="{{ field.data }}" />
         {% endif %}
         {% if field.errors %}
             <ul class="errors">
@@ -43,19 +43,16 @@
 {% endmacro %}
 
 {% macro render_list_field(field) %}
-<div class="form-group">
-    <label for="{{field.id}}">
-        {{ field.entry.id }}
-    </label>
-    <input id="{{field.entry.id}}" name="{{field.entry.id}}"
-    type="text" value="{{field.entry.data}}" />
+<div class="form-list-item">
+    <input id="{{ field.entry.id }}" name="{{ field.entry.id }}"
+        type="text" value="{{ field.entry.data }}" />
     {{ render_delete(field.delete) }}
 </div>
 {% endmacro %}
 
 {% macro render_delete(delete) %}
-    <button id="{{delete.id}}" name="{{delete.id}}"
-        type="submit" value="Delete" class="pull-right btn btn-lg btn-danger">
+    <button id="{{ delete.id }}" name="{{ delete.id }}"
+        type="submit" value="Delete" class="btn btn-danger">
         <i class="fa fa-times"></i>
     </button>
 {% endmacro %}
