@@ -267,7 +267,7 @@ def who_is_in_config():
 
 if __name__ == '__main__':
     app.secret_key = config.SECRET
-    app.run(port=config.PORT)
+    app.run(port=config.PORT, debug=True)
 
 
 class Error(Exception):

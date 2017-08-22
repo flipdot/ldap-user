@@ -23,6 +23,9 @@ def send_notification(to_address, subject, message):
     msg['From'] = fromMail
     msg['To'] = to_address
 
+    if not 'MAIL_PW' in dir(config):
+        print("Error: MAIL_PW not set")
+        return
     s = smtplib.SMTP()
     s.connect(host='vega.uberspace.de', port=587)
     s.ehlo()
