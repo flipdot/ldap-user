@@ -7,7 +7,8 @@ import subprocess
 from urllib import urlencode
 
 import time
-from flask import Flask, session, redirect, url_for, request, render_template
+from flask import Flask, session, redirect, url_for, request, render_template, \
+    Response
 import copy
 import config
 import notification
@@ -258,12 +259,26 @@ def get(list, index, default=''):
 
 @app.route('/system/who_is_in_config')
 def who_is_in_config():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    subprocess.check_output(['bash', '-c', 'cd '+dir_path+'/utils && ./macaddress.sh'])
-    with open("/tmp/ldap_macs.sed", "r") as f:
-        resp = f.read()
-    return resp
+    users = FlipdotUser().get_all_users()
+    macs = []
+    for user in users:
+        if 'macAddress' not in user[1]:
+            continue
+        for mac in user[1]['macAddress']:
+            mac = mac.replace('-', ':')
+            macs.append("s/%s/%s/i" % (mac, user[1]['sn'][0]))
+    return Response('\n'.join(macs)+'\n', mimetype='text/plain')
 
+@app.route('/system/ssh_keys')
+def ssh_keys():
+    users = FlipdotUser().get_all_users()
+    ssh_keys = []
+    for user in users:
+        if 'sshPublicKey' not in user[1]:
+            continue
+        for key in user[1]['sshPublicKey']:
+            ssh_keys.append(key + " " + user[1]['cn'][0])
+    return Response('\n'.join(ssh_keys)+'\n', mimetype='text/plain')
 
 if __name__ == '__main__':
     app.secret_key = config.SECRET
