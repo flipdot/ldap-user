@@ -9,7 +9,7 @@
             <span class="small">Why would you want to do that?</span>
         </h2>
         <h3>
-            Member Status: <i class="fa {{ 'fa-check' if (user['meta']['is_admin']) else 'fa-times' }}"></i>
+            Member Status: <i class="fa {{ 'fa-check' if (user['meta']['is_member']) else 'fa-times' }}"></i>
         </h3>
 
         {% from "_formhelper.html" import render_field %}
