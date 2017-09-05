@@ -4,11 +4,13 @@
 {% block content %}
     {% if session.username %}
         <h1>Hello {{ form.uid.data }}!</h1>
-
         <h2>
             Here, you can edit yourself.
             <span class="small">Why would you want to do that?</span>
         </h2>
+        <h3>
+            Member Status: <i class="fa {{ 'fa-check' if (user['meta']['is_admin']) else 'fa-times' }}"></i>
+        </h3>
 
         {% from "_formhelper.html" import render_field %}
         {% from "_formhelper.html" import render_list_field %}

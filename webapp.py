@@ -31,7 +31,6 @@ if not app.debug:
 @app.route('/')
 def index():
     if 'username' in session:
-
         return redirect(url_for('user'))
     else:
         return render_template('login.html', username=None)
@@ -107,7 +106,7 @@ def user():
     form.confirm.data = ""
 
     form.drink_notification.data = data['meta']['drink_notification']
-    return render_template('index.html', form=form)
+    return render_template('index.html', form=form, user=data)
 
 @app.route('/user/set_member', methods=['POST'])
 def set_admin():
