@@ -1,3 +1,5 @@
+import json
+
 import ldap
 import ldap.modlist as modlist
 import ldap.filter
@@ -40,13 +42,39 @@ class FlipdotUser:
         except Exception as e:
             raise e
 
+    def get_meta(self, data):
+        meta_str = data.get('postOfficeBox', [None])[0]
+        meta = {
+            "drink_notification": "instant",  # instant, daily, weekly, never
+            "last_drink_notification": 0,
+            "is_admin": False,
+            "is_member": False,
+        }
+        if meta_str:
+            try:
+                meta_o = json.loads(meta_str)
+                if type(meta_o) == dict:
+                    meta = meta_o
+            except:
+                pass
+        return meta
+
+    def set_meta(self, data, meta):
+        meta_str = json.dumps(meta).encode('utf8', 'ignore')
+        if not 'postOfficeBox' in data:
+            data['postOfficeBox'] = [None]
+        data['postOfficeBox'][0] = meta_str
+
     def getusers(self, filter):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
         base_dn = "ou=members,dc=flipdot,dc=org"
         attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'sn', 'uidNumber', 'macAddress', 'objectclass', 'postOfficeBox']
-        user = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
+        users = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
         con.unbind()
-        return user
+
+        for user in users:
+            user[1]['meta'] = self.get_meta(user[1])
+        return users
 
 
     def getuser(self, uid):
@@ -63,9 +91,10 @@ class FlipdotUser:
         return reverse_users
 
 
-    def setuserdata(self, dn, old, new, session):
+    def setuserdata(self, dn, new, session):
         all_classes = self.ensure_object_classes({})
         user = self.getuser(dn)
+        old = user[1]
 
         add_object_classes = []
         for c in all_classes['objectclass']:
@@ -87,11 +116,17 @@ class FlipdotUser:
         # ensure object classes
         con.modify_s(dn, modlist.modifyModlist({}, {'objectClass':add_object_classes}))
 
+        self.set_meta(new, new['meta'])
+        del (new['meta'])
+        del (old['meta'])
         # safe new attribtes
         ldif = modlist.modifyModlist(old, new)
+        new['meta'] = self.get_meta(new)
+
         con.modify_s(dn, ldif)
 
         con.unbind()
+
 
     def setPasswd(self, dn, old, new):
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)

@@ -101,11 +101,20 @@ td, th {
     align-items: flex-end;
 }
 
+.user-list .setting {
+    display: flex;
+    align-items: center;
+}
+.user-list .setting>i {
+    margin: 0 .5em 0 0;
+}
+
 .form-list-item input {
     margin-right: .5em;
 }
 
-.form-list-item .btn {
+.form-list-item .btn,
+.user-list .btn {
     margin: 0;
     padding: .1em .3em;
 }
@@ -180,6 +189,9 @@ select {
     background-color: #fff;
     color: #333;
     border: 1px solid #666;
+}
+.btn:hover {
+    background-color: #eee;
 }
 
 .submit-btn {

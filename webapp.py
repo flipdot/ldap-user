@@ -49,21 +49,14 @@ def user():
         if not form.validate():
             return render_template('index.html', form=form)
 
-        new = copy.deepcopy(data)
+        data['sn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
+        data['uid'][0] = form.uid.data.encode('utf8', 'ignore')
+        data.setdefault('mail', [''])[0] = (form.mail.data.encode('utf8', 'ignore'))
 
-        new['sn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
-        new['uid'][0] = form.uid.data.encode('utf8', 'ignore')
-        new.setdefault('mail', [''])[0] = (form.mail.data.encode('utf8', 'ignore'))
+        data['sshPublicKey'] = [x.entry.data.encode('utf8', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
+        data['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
-        new['sshPublicKey'] = [x.entry.data.encode('utf8', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
-        new['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
-
-        meta = get_meta(data)
-        meta['drink_notification'] = form.drink_notification.data
-        meta_str = json.dumps(meta).encode('utf8', 'ignore')
-        if not 'postOfficeBox' in new:
-            new['postOfficeBox'] = [None]
-        new['postOfficeBox'][0] = meta_str
+        user['meta']['drink_notification'] = form.drink_notification.data
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('utf8', 'ignore')
@@ -71,7 +64,7 @@ def user():
             print("update pw")
             FlipdotUser().setPasswd(dn, old_pw, new_pw)
 
-        FlipdotUser().setuserdata(dn, data, new, session)
+        FlipdotUser().setuserdata(dn, data, session)
 
         return redirect(url_for('user'))
 
@@ -113,24 +106,30 @@ def user():
     form.oldPassword.data = ""
     form.confirm.data = ""
 
-    meta = get_meta(data)
-    form.drink_notification.data = meta['drink_notification']
+    form.drink_notification.data = data['meta']['drink_notification']
     return render_template('index.html', form=form)
 
-def get_meta(data):
-    meta_str = data.get('postOfficeBox', [None])[0]
-    meta = {
-        "drink_notification": "instant",  # instant, daily, weekly, never
-        "last_drink_notification": 0,
-    }
-    if meta_str:
-        try:
-            meta_o = json.loads(meta_str)
-            if type(meta_o) == dict:
-                meta = meta_o
-        except:
-            pass
-    return meta
+@app.route('/user/set_member', methods=['POST'])
+def set_admin():
+    user_uid = request.form.get('uid')
+    is_member = request.form.get('is_member')
+    is_admin = request.form.get('is_admin')
+    if user_uid is None or (is_member is None and is_admin is None):
+        return render_template("error.html", message="must supply uid and is_member/is_admin")
+    try:
+        admin_dn, admin_data = FlipdotUser().getuser(session['username'])
+        user_dn, user_data = FlipdotUser().getuser(user_uid)
+    except FrontendError as e:
+        return render_template("error.html", message=e.message)
+
+    if 'is_admin' not in admin_data['meta'] or not admin_data['meta']['is_admin']:
+        return render_template("error.html", message="You must be admin")
+    if is_member is not None:
+        user_data['meta']['is_member'] = is_member == 'true'
+    if is_admin is not None:
+        user_data['meta']['is_admin'] = is_admin == 'true'
+    FlipdotUser().setuserdata(user_dn, user_data, session)
+    return redirect(url_for('list'))
 
 def remove_deleted_entry(form_list):
     tmp = []
@@ -234,8 +233,10 @@ def logout():
 
 @app.route('/list')
 def list():
-    user_list = FlipdotUser().get_all_users()
-    return render_template('list.html', users=user_list)
+    ldap = FlipdotUser()
+    user = ldap.getuser(session['username'])
+    user_list = ldap.get_all_users()
+    return render_template('list.html', users=user_list, login_user=user)
 
 
 @app.route('/add', methods=['POST', 'GET'])

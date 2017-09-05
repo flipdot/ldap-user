@@ -3,6 +3,8 @@
 {% block title %}List members{% endblock %}
 
 {% block content %}
+    {% set login_dn = login_user[0] %}
+    {% set login_user = login_user[1] %}
     <table class="user-list">
         <thead>
             <tr>
@@ -11,15 +13,47 @@
                 <th>Email</th>
                 <th>ID number</th>
                 <th># SSH Keys</th>
+                <th>Member</th>
+                {% if login_user['meta']['is_admin'] %}
+                    <th>Admin</th>
+                {% endif %}
             </tr>
         </thead>
         {% for user in users %}
+            {% set dn = user[0] %}
+            {% set user = user[1] %}
             <tr>
-                <td>{{ user[1].uid[0] }}</td>
-                <td>{{ (user[1].sn or [''])[0] }}</td>
-                <td>{{ (user[1].mail or [''])[0] }}</td>
-                <td>{{ (user[1].uidNumber or ['none'])[0]  }}</td>
-                <td>{{ (user[1].sshPublicKey|length) or '0' }}</td>
+                <td>{{ user.uid[0] }}</td>
+                <td>{{ (user.sn or [''])[0] }}</td>
+                <td>{{ (user.mail or [''])[0] }}</td>
+                <td>{{ (user.uidNumber or ['none'])[0]  }}</td>
+                <td>{{ (user.sshPublicKey|length) or '0' }}</td>
+                <td>
+                    <div class="setting">
+                        <i class="fa {{ 'fa-check' if (user['meta']['is_member']) else 'fa-times' }}"></i>
+                        {% if login_user['meta']['is_admin'] %}
+                                <form action="/user/set_member" method="POST">
+                                    <input type="hidden" name="uid" value="{{ dn }}">
+                                    <button class="btn" type="submit" name="is_member" value="{{ 'false' if (user['meta']['is_member']) else 'true' }}">
+                                        <i class="fa {{ 'fa-times' if (user['meta']['is_member']) else 'fa-check'  }}"></i>
+                                    </button>
+                                </form>
+                        {% endif %}
+                    </div>
+                </td>
+                {% if login_user['meta']['is_admin'] %}
+                    <td>
+                        <div class="setting">
+                            <i class="fa {{ 'fa-check' if (user['meta']['is_admin']) else 'fa-times' }}"></i>
+                            <form action="/user/set_member" method="POST">
+                                <input type="hidden" name="uid" value="{{ dn }}">
+                                <button class="btn" type="submit" name="is_admin" value="{{ 'false' if (user['meta']['is_admin']) else 'true'  }}">
+                                    <i class="fa {{ 'fa-times' if (user['meta']['is_admin']) else 'fa-check'  }}"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>
