@@ -128,7 +128,7 @@ def set_admin():
         user_data['meta']['is_member'] = is_member == 'true'
     if is_admin is not None:
         user_data['meta']['is_admin'] = is_admin == 'true'
-    FlipdotUser().setuserdata(user_dn, user_data, session)
+    FlipdotUser().setuserdata(user_dn, user_data, {})
     return redirect(url_for('list'))
 
 def remove_deleted_entry(form_list):
@@ -276,6 +276,8 @@ def ssh_keys():
     ssh_keys = []
     for user in users:
         if 'sshPublicKey' not in user[1]:
+            continue
+        if 'is_member' not in user[1]['meta'] or not user[1]['meta']['is_member']:
             continue
         for key in user[1]['sshPublicKey']:
             ssh_keys.append(key + " " + user[1]['cn'][0])
