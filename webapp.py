@@ -46,7 +46,7 @@ def user():
 
     if request.method == "POST" and request.form.get('submit', '') == 'submit':
         if not form.validate():
-            return render_template('index.html', form=form)
+            return render_template('index.html', form=form, user=data)
 
         data['sn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
         data['uid'][0] = form.uid.data.encode('utf8', 'ignore')
@@ -55,7 +55,7 @@ def user():
         data['sshPublicKey'] = [x.entry.data.encode('utf8', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
         data['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
-        user['meta']['drink_notification'] = form.drink_notification.data
+        data['meta']['drink_notification'] = form.drink_notification.data
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('utf8', 'ignore')
@@ -72,18 +72,18 @@ def user():
         e.entry = ""
         e.delete = False
         form.sshKeys.append_entry(e)
-        return render_template('index.html', form=form)
+        return render_template('index.html', form=form, user=data)
     elif request.method == "POST" and request.form.get('submit', '') == 'addMAC':
         e = ListMacForm()
         e.entry = ""
         e.delete = False
         form.macs.append_entry(e)
-        return render_template('index.html', form=form)
+        return render_template('index.html', form=form, user=data)
     elif request.method == "POST":
         remove_deleted_entry(form.sshKeys)
         remove_deleted_entry(form.macs)
 
-        return render_template('index.html', form=form)
+        return render_template('index.html', form=form, user=data)
 
     form.uid.data = data['uid'][0]
     form.sammyNick.data = data['sn'][0]
