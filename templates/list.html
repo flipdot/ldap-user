@@ -10,7 +10,9 @@
             <tr>
                 <th>Name</th>
                 <th>BananaNick&trade;</th>
-                <th>Email</th>
+                {% if login_user['meta']['is_member'] %}
+                    <th>Email</th>
+                {% endif %}
                 <th>ID number</th>
                 <th># SSH Keys</th>
                 <th>Member</th>
@@ -25,7 +27,9 @@
             <tr>
                 <td>{{ user.uid[0] }}</td>
                 <td>{{ (user.sn or [''])[0] }}</td>
-                <td>{{ (user.mail or [''])[0] }}</td>
+                {% if login_user['meta']['is_member'] %}
+                    <td>{{ (user.mail or [''])[0] }}</td>
+                {% endif %}
                 <td>{{ (user.uidNumber or ['none'])[0]  }}</td>
                 <td>{{ (user.sshPublicKey|length) or '0' }}</td>
                 <td>
