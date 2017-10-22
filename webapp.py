@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import base64
 import hashlib
 import hmac
@@ -237,6 +238,25 @@ def list():
     user_list = ldap.get_all_users()
     return render_template('list.html', users=user_list, login_user=user)
 
+@app.route('/user/impersonate', methods=["GET"])
+def impersonate():
+    user = request.args.get('user')
+    if not user:
+        return render_template("error.html", message="Not a valid user")
+    try:
+        dn, data = FlipdotUser().getuser(session['username'])
+    except FrontendError as e:
+        return render_template("error.html", message=e.message)
+    if not data['meta']['is_admin']:
+        return render_template("error.html", message=u"No. 😾")
+
+    try:
+        dn_imp, data_imp = FlipdotUser().getuser(user)
+    except FrontendError as e:
+        return render_template("error.html", message=e.message)
+
+    session['username'] = user
+    return redirect('/')
 
 @app.route('/add', methods=['POST', 'GET'])
 def add():

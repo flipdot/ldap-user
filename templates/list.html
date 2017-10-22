@@ -10,7 +10,7 @@
             <tr>
                 <th>Name</th>
                 <th>BananaNick&trade;</th>
-                {% if login_user['meta']['is_member'] %}
+                {% if login_user['meta']['is_admin'] %}
                     <th>Email</th>
                 {% endif %}
                 <th>ID number</th>
@@ -18,6 +18,7 @@
                 <th>Member</th>
                 {% if login_user['meta']['is_admin'] %}
                     <th>Admin</th>
+                    <th>Impersonate</th>
                 {% endif %}
             </tr>
         </thead>
@@ -27,7 +28,7 @@
             <tr>
                 <td>{{ user.uid[0] }}</td>
                 <td>{{ (user.sn or [''])[0] }}</td>
-                {% if login_user['meta']['is_member'] %}
+                {% if login_user['meta']['is_admin'] %}
                     <td>{{ (user.mail or [''])[0] }}</td>
                 {% endif %}
                 <td>{{ (user.uidNumber or ['none'])[0]  }}</td>
@@ -53,6 +54,16 @@
                                 <input type="hidden" name="uid" value="{{ dn }}">
                                 <button class="btn" type="submit" name="is_admin" value="{{ 'false' if (user['meta']['is_admin']) else 'true'  }}">
                                     <i class="fa {{ 'fa-times' if (user['meta']['is_admin']) else 'fa-check'  }}"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="setting">
+                            <form action="/user/impersonate" method="GET">
+                                <input type="hidden" name="user" value="{{ dn }}">
+                                <button class="btn" type="submit">
+                                    <i class="fa fa-female"></i>
                                 </button>
                             </form>
                         </div>
