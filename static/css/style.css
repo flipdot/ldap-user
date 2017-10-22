@@ -204,3 +204,17 @@ select {
     width: 100%;
     background-color: #9fe09f;
 }
+.submit-btn.clean {
+    background-color: #fff;
+}
+.submit-btn.dirty {
+    animation-name: blink;
+    animation-duration: .2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 3;
+}
+
+@keyframes blink {
+  0%   { background-color: #fff; }
+  100% { background-color: #9fe09f; }
+}

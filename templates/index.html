@@ -74,4 +74,30 @@
     {% else %}
         <h1>Hello World!</h1>
     {% endif %}
+
+
+<script>
+    function each(e, fn) {
+        for (const el of e) {
+            fn(el)
+        }
+    }
+    function saveButton() {
+        const inputs = document.querySelectorAll("input,select")
+        const saveButtons = document.querySelectorAll(".submit-btn")
+        each(saveButtons, (b) => {
+            b.classList.add("clean")
+        })
+        for (const input of inputs) {
+            input.addEventListener("input", (e) => {
+                console.log("edit", e)
+                each(saveButtons, (b) => {
+                    b.classList.remove("clean")
+                    b.classList.add("dirty")
+                })
+            })
+        }
+    }
+    document.onload = saveButton()
+</script>
 {% endblock %}
