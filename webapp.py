@@ -57,6 +57,7 @@ def user():
         data['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
         data['meta']['drink_notification'] = form.drink_notification.data
+        data['meta']['hue'] = form.hue.data
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('utf8', 'ignore')
@@ -88,6 +89,7 @@ def user():
 
     form.uid.data = data['uid'][0]
     form.sammyNick.data = data['sn'][0]
+    form.hue.data = data['meta']['hue']
 
     for key in data.get('sshPublicKey', []):
         e = ListSSHForm()

@@ -1,5 +1,5 @@
 from wtforms import Form, StringField, PasswordField, FieldList, SubmitField, \
-    validators, FormField, ValidationError, SelectField
+    validators, FormField, ValidationError, SelectField, IntegerField
 from wtforms.fields.html5 import EmailField
 from sshpubkeys import SSHKey, InvalidKeyException
 from wtforms.validators import InputRequired
@@ -37,7 +37,9 @@ class LdapForm(Form):
                                          ("weekly", "weekly"),
                                          ("never", "never"),
                                      ])
-
+    hue = IntegerField("Hue", validators=[
+        validators.NumberRange(min=0, max=360)
+    ])
     oldPassword = PasswordField('Old Password')
     password = PasswordField('New Password', [
         validators.EqualTo('confirm', message='Passwords must match')

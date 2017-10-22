@@ -56,3 +56,12 @@
         <i class="fa fa-times"></i>
     </button>
 {% endmacro %}
+
+{% macro render_colorselect(field) %}
+    <div class="form-group">
+        <label class="hue-selector-label">{{ field.name }}
+            <input type="range" class="hue-select" name="{{ field.id }}" min="0" max="360" value="{{ field.data }}">
+            </input>
+        </label>
+    </div>
+{% endmacro %}

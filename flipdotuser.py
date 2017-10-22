@@ -44,12 +44,14 @@ class FlipdotUser:
 
     def get_meta(self, data):
         meta_str = data.get('postOfficeBox', [None])[0]
-        meta = {
+        default_meta = {
             "drink_notification": "instant",  # instant, daily, weekly, never
             "last_drink_notification": 0,
             "is_admin": False,
             "is_member": False,
+            "hue": 0,
         }
+        meta = default_meta
         if meta_str:
             try:
                 meta_o = json.loads(meta_str)
@@ -57,6 +59,9 @@ class FlipdotUser:
                     meta = meta_o
             except:
                 pass
+        for key, value in default_meta.iteritems():
+            if not key in meta:
+                meta[key] = value
         return meta
 
     def set_meta(self, data, meta):

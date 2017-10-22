@@ -14,6 +14,7 @@
 
         {% from "_formhelper.html" import render_field %}
         {% from "_formhelper.html" import render_list_field %}
+        {% from "_formhelper.html" import render_colorselect %}
 
         <form class="edit-user-form" action="{{ url_for('user') }}" method="post">
             <button class="btn submit-btn" type="submit" name="submit" value="submit">
@@ -26,6 +27,8 @@
                 {{ render_field(form.uid) }}
                 {{ render_field(form.sammyNick) }}
                 {{ render_field(form.mail) }}
+
+                {{ render_colorselect(form.hue) }}
             </div>
 
             <div class="panel">
@@ -98,6 +101,26 @@
             })
         }
     }
-    document.onload = saveButton()
+    function updateColorSelect(e) {
+        const val = e.value
+                const col = "hsl("+val+", 100%, 50%)"
+                console.log("col")
+                each(e.labels, (label) => {
+                    label.style.backgroundColor = col
+                })
+    }
+    function colorSelect() {
+        const selects = document.querySelectorAll(".hue-select")
+        each(selects, (select) => {
+            select.addEventListener("input", (event) => {
+                updateColorSelect(event.target)
+            })
+            updateColorSelect(select)
+        })
+    }
+    window.onload = function() {
+        saveButton()
+        colorSelect()
+    }
 </script>
 {% endblock %}
