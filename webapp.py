@@ -286,9 +286,11 @@ def who_is_in_config():
     for user in users:
         if 'macAddress' not in user[1]:
             continue
+        sammyNick = user[1]['sn'][0]
+        sammyNick = sammyNick.replace('/', '\\/')
         for mac in user[1]['macAddress']:
-            mac = mac.replace('-', ':')
-            macs.append("s/%s/%s/i" % (mac, user[1]['sn'][0]))
+            mac = mac.replace('-', ':').strip()
+            macs.append("s/%s/%s/i" % (mac, sammyNick))
     return Response('\n'.join(macs)+'\n', mimetype='text/plain')
 
 @app.route('/system/ssh_keys')
@@ -303,6 +305,21 @@ def ssh_keys():
         for key in user[1]['sshPublicKey']:
             ssh_keys.append(key + " " + user[1]['cn'][0])
     return Response('\n'.join(ssh_keys)+'\n', mimetype='text/plain')
+
+
+@app.route('/system/who_is_hue')
+def who_is_hue():
+    users = FlipdotUser().get_all_users()
+    hues = []
+    for user in users:
+        if 'hue' not in user[1]['meta']:
+            continue
+        hue = user[1]['meta']['hue']
+        sammyNick = user[1]['sn'][0]
+        sammyNick = sammyNick.replace('/', '\\/')
+        hues.append("s/%s/%s/" % (sammyNick, hue))
+    return Response('\n'.join(hues)+'\n', mimetype='text/plain')
+
 
 if __name__ == '__main__':
     app.secret_key = config.SECRET
