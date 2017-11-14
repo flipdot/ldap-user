@@ -12,6 +12,19 @@
 
         {{ render_field(form.password) }}
         {{ render_field(form.confirm) }}
+
+        <ul class="errors">
+        {% for field in form.errors %}
+            <li>
+                {{ field }}
+                <ul class="field">
+                    {% for err in form.errors[field] %}
+                        <li>{{ err }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
         <input type="submit" />
     </form>
 {% endblock %}

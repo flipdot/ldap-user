@@ -37,7 +37,7 @@ class LdapForm(Form):
                                          ("weekly", "weekly"),
                                          ("never", "never"),
                                      ])
-    hue = IntegerField("Hue", validators=[
+    hue = IntegerField("Hue", default=0, validators=[
         validators.NumberRange(min=0, max=360)
     ])
     oldPassword = PasswordField('Old Password')
