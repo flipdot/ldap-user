@@ -24,10 +24,10 @@ class ListMacForm(Form):
 
 class LdapForm(Form):
     uid = StringField('Username', validators=[
-        validators.Length(min=4, max=25, message="Username length is baad. min: 4, max: 25"),
+        validators.Length(min=2, max=25, message="Username length is baad. min: 2, max: 25"),
         validators.DataRequired(message="Username is required")])
     sammyNick = StringField('BananaNick', validators=[
-        validators.Length(min=4, max=25, message="BananaNick is baad. min: 4, max: 25"),
+        validators.Length(min=2, max=25, message="BananaNick is baad. min: 2, max: 25"),
         validators.DataRequired(message="BanaNick is required!")])
     drink_notification = SelectField('Drink Notification',
                                      default='instant',
