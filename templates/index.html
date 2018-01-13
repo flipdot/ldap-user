@@ -15,6 +15,7 @@
         {% from "_formhelper.html" import render_field %}
         {% from "_formhelper.html" import render_list_field %}
         {% from "_formhelper.html" import render_colorselect %}
+        {% from "_formhelper.html" import render_dl %}
 
         <form class="edit-user-form" action="{{ url_for('user') }}" method="post">
             <button class="btn submit-btn" type="submit" name="submit" value="submit">
@@ -24,6 +25,9 @@
 
             <div class="panel">
                 <h3>GECOS</h3>
+                <dl>
+                    {{ render_dl("ID number", user.uidNumber[0]) }}
+                </dl>
                 {{ render_field(form.uid) }}
                 {{ render_field(form.sammyNick) }}
                 {{ render_field(form.mail) }}

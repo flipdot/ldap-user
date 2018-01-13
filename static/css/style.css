@@ -161,6 +161,21 @@ select {
     justify-content: space-between;
 }
 
+dl {
+    display: flex;
+    margin-bottom: .1em;
+    font-weight: 300;
+    justify-content: space-between;
+}
+
+dl dt {
+    align-items: flex-start;
+}
+
+dl dd {
+    align-items: flex-end;
+}
+
 .panel:not(:empty) {
     border: 1px solid #eee;
     padding: 0px 15px 15px 15px;
