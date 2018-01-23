@@ -148,6 +148,8 @@ def login():
     if request.method == 'POST':
         uid = request.form.get('uid', '')
         pwd = request.form.get('password', '')
+        if not uid or not pwd:
+            return redirect("/", 302)
         try:
             valid, dn = FlipdotUser().login(uid, pwd)
         except FrontendError as e:
