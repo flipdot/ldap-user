@@ -23,10 +23,9 @@ sys.setdefaultencoding('utf-8')
 app = Flask(__name__)
 if not app.debug:
     import logging
-    from logging import FileHandler
-    file_handler = FileHandler(config.LOG_FILE)
-    file_handler.setLevel(logging.WARNING)
-    app.logger.addHandler(file_handler)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(levelname)s][%(name)s] %(message)s")
 
 
 @app.route('/')
