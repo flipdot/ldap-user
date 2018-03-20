@@ -9,3 +9,9 @@ LDAP_MEMBER_GID = "10000"
 
 LOG_FILE = "/var/log/ldap-webapp.log"
 PORT=5000
+
+DOMAIN = "my.domain"
+EMAIL = "my@email.org"
+
+DEBUG=True
+STAGING=True

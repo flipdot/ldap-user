@@ -8,6 +8,8 @@ import subprocess
 from urllib import urlencode
 
 import time
+
+from acme_python import acme
 from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
 import copy
@@ -19,14 +21,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 app = Flask(__name__)
-if not app.debug:
-    import logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="[%(levelname)s][%(name)s] %(message)s")
-
 
 @app.route('/')
 def index():
@@ -199,7 +194,6 @@ def reset_password():
 
 @app.route('/forgot_password', methods=['POST'])
 def forgot_password():
-    message = "You might have gotten a mail."
     if request.method != 'POST':
         return redirect(url_for('index'))
 
@@ -213,9 +207,9 @@ def forgot_password():
             return render_template("error.html", message="User %s not found" % uid)
         mail = ret[1]['mail'][0]
     except FrontendError as e:
-        return render_template("error.html", message=e.message)
+        return render_template("error.html", message="You triggered an error: " + str(e))
     if not mail:
-        return render_template("error.html", message=e.message)
+        return render_template("error.html", message="No email address found")
     print "Resetting password for %s (%s)" % (uid, mail)
     date = str(time.time())
     dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
@@ -226,7 +220,7 @@ def forgot_password():
                                    "[flipdot-noti] Passwort-Reset",
                                    msg)
     print msg
-    return render_template("error.html", message=message)
+    return render_template("error.html", message="You should have gotten a mail.")
 
 @app.route('/logout')
 def logout():
@@ -323,8 +317,19 @@ def who_is_hue():
 
 
 if __name__ == '__main__':
+    if not app.debug:
+        import logging
+        from logging import FileHandler
+
+        file_handler = FileHandler(config.LOG_FILE)
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
+
+    tls = acme.ACME(app, staging=config.STAGING)
     app.secret_key = config.SECRET
-    app.run(port=config.PORT, debug=True)
+    app.run(port=config.PORT, debug=config.DEBUG)
+    tls.start()
+    tls.thread.join()
 
 
 class Error(Exception):
