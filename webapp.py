@@ -3,21 +3,18 @@
 import base64
 import hashlib
 import hmac
-import json
-import subprocess
+import sys
+import time
 from urllib import urlencode
 
-import time
-
-from acme_python import acme
 from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
-import copy
-import config
+
 import notification
-from flipdotuser import *
 from LdapForm import *
-import sys
+from acme_python import acme
+from flipdotuser import *
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -328,7 +325,7 @@ if __name__ == '__main__':
     tls = acme.ACME(app, staging=config.STAGING)
     app.secret_key = config.SECRET
     app.run(port=config.PORT, debug=config.DEBUG)
-    tls.start()
+    tls.stop()
     tls.thread.join()
 
 

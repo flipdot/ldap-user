@@ -31,7 +31,9 @@
                 {% if login_user['meta']['is_admin'] %}
                     <td>{{ (user.mail or [''])[0] }}</td>
                 {% endif %}
-                <td>{{ (user.uidNumber or ['none'])[0]  }}</td>
+                <td style="background-color: hsl({{ user.meta.hue }}, 100%, 50%)">
+                    {{ (user.uidNumber or ['none'])[0]  }}
+                </td>
                 <td>{{ (user.sshPublicKey|length) or '0' }}</td>
                 <td>
                     <div class="setting">
