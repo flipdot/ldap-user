@@ -19,10 +19,6 @@ class FlipdotUser:
     def connect(self, dn, pw):
         try:
             #ldap.set_option(ldap.OPT_DEBUG_LEVEL, 4095)
-            ca_cert = os.getcwd()+"/cacert.pem"
-            if not os.path.isfile(ca_cert):
-                print "cert not found"
-            ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, ca_cert)
             con = ldap.initialize(config.LDAP_HOST, trace_level=0)
             con.simple_bind_s(dn, pw)
         except ldap.SERVER_DOWN as e:
