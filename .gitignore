@@ -1,5 +1,4 @@
 *.pyc
 config.py
-.idea
 .ropeproject
 .*.sw[op]
