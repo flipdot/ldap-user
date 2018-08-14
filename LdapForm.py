@@ -34,7 +34,9 @@ class LdapForm(Form):
                                      choices=[
                                          ("instant", "instant"),
                                          ("daily", "daily"),
+                                         ("instant and daily", "instant and daily"),
                                          ("weekly", "weekly"),
+                                         ("instant and weekly", "instant and weekly"),
                                          ("never", "never"),
                                      ])
     hue = IntegerField("Hue", default=0, validators=[
