@@ -264,6 +264,20 @@ def add():
 
     return render_template('add.html', form=form)
 
+@app.route('/user/<uid>', methods=['DELETE'])
+def delete(uid):
+    if uid is None:
+        return render_template("error.html", message="must supply uid")
+    try:
+        admin_dn, admin_data = FlipdotUser().getuser(session['username'])
+        user_dn, user_data = FlipdotUser().getuser(uid)
+    except FrontendError as e:
+        return "Error: " + e.message
+    if 'is_admin' not in admin_data['meta'] or not admin_data['meta']['is_admin']:
+        return "Error: You must be admin"
+    FlipdotUser().delete(dn=user_dn)
+    return "OK"
+
 
 def get(list, index, default=''):
     try:
@@ -322,11 +336,13 @@ if __name__ == '__main__':
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
 
-    tls = acme.ACME(app, staging=config.STAGING)
+    if config.HTTPS:
+        tls = acme.ACME(app, staging=config.STAGING)
     app.secret_key = config.SECRET
     app.run(port=config.PORT, debug=config.DEBUG)
-    tls.stop()
-    tls.thread.join()
+    if config.HTTPS:
+        tls.stop()
+        tls.thread.join()
 
 
 class Error(Exception):

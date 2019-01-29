@@ -8,8 +8,8 @@
     </h1>
     <form action="{{ url_for('login') }}" method="post">
         <div class="form-group">
-            <label for="uid" class="col-sm-2 col-form-label">Username</label>
-            <input class="form-control" type="text" name="uid" id="uid"/>
+            <label for="uid_login" class="col-sm-2 col-form-label">Username</label>
+            <input class="form-control" type="text" name="uid" id="uid_login"/>
         </div>
         <div class="form-group">
             <label for="password" class="col-sm-2 col-form-label">Password</label>
@@ -26,8 +26,8 @@
     <form action="{{ url_for('forgot_password') }}" method="post">
         <h3>Forgot Password</h3>
         <div class="form-group">
-            <label for="uid" class="col-sm-2 col-form-label">Username</label>
-            <input class="form-control" type="text" name="uid" id="uid"/>
+            <label for="uid_reset" class="col-sm-2 col-form-label">Username</label>
+            <input class="form-control" type="text" name="uid" id="uid_reset"/>
         </div>
         <div class="form-group">
             <button class="btn btn-success" type="submit" value="login">

@@ -19,6 +19,7 @@
                 {% if login_user['meta']['is_admin'] %}
                     <th>Admin</th>
                     <th>Impersonate</th>
+                    <th>Delete</th>
                 {% endif %}
             </tr>
         </thead>
@@ -70,8 +71,34 @@
                             </form>
                         </div>
                     </td>
+                    <td>
+                        <div class="setting">
+                            <button class="btn" onclick="removeUser('{{ dn }}')">
+                                <i class="fa fa-remove"></i>
+                            </button>
+                        </div>
+                    </td>
                 {% endif %}
             </tr>
         {% endfor %}
     </table>
+
+<script>
+    function removeUser(dn) {
+        if (confirm('Are you absolutely fucking sure you want to delete ' + dn + '?')) {
+            fetch('/user/' + dn, {method: 'delete'})
+                .then(function (response){
+                    response.text().then(function(text){
+                        alert(text);
+                        window.location.reload();
+                    });
+                })
+                .catch(function(err){
+                    alert(err.toString())
+                });
+        } else {
+            alert("Didn't delete anybody.");
+        }
+    }
+</script>
 {% endblock %}

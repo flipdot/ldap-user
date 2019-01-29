@@ -135,6 +135,10 @@ class FlipdotUser:
         con.unbind()
 
 
+    def delete(self, dn):
+        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
+        con.delete_s(dn)
+
     def ensure_object_classes(self, attrs):
         attrs['objectclass'] = ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
                                 'person', 'posixAccount', 'ieee802Device']
@@ -167,4 +171,3 @@ class FlipdotUser:
 
         last = users[0]
         return int(last[1]['uidNumber'][0])+1
-
