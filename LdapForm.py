@@ -42,11 +42,11 @@ class LdapForm(Form):
     hue = IntegerField("Hue", default=0, validators=[
         validators.NumberRange(min=0, max=360)
     ])
-    oldPassword = PasswordField('Old Password')
-    password = PasswordField('New Password', [
+    oldPassword = PasswordField('Old password')
+    password = PasswordField('New password', [
         validators.EqualTo('confirm', message='Passwords must match')
     ])
-    confirm = PasswordField('Repeat Password')
+    confirm = PasswordField('Repeat new password')
 
     mail = EmailField("Email", validators=[validators.Email(message="Email is invalid!")])
 
@@ -55,9 +55,8 @@ class LdapForm(Form):
 
 
 class PasswdForm(Form):
-    password = PasswordField('New Password', [
+    password = PasswordField('New password', [
         validators.Length(min=6, message="Your password must be 6 characters minimum."),
-        validators.EqualTo('confirm', message='Passwords must match')
+        validators.EqualTo('confirm', message='Passwords must match.')
     ])
-    confirm = PasswordField('Repeat Password')
-
+    confirm = PasswordField('Repeat new password')

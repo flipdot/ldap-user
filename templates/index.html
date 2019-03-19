@@ -5,8 +5,7 @@
     {% if session.username %}
         <h1>Hello {{ form.uid.data }}!</h1>
         <h2>
-            Here, you can edit yourself.
-            <span class="small">Why would you want to do that?</span>
+            Here you can edit your account.
         </h2>
         <h3>
             Member Status: <i class="fa {{ 'fa-check' if (user['meta']['is_member']) else 'fa-times' }}"></i>
