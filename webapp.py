@@ -1,4 +1,5 @@
-#!/usr/bin/env python2
+#!/bin/sh
+"exec" "`dirname $0`/.env/bin/python" "$0" "$@"
 # -*- coding: utf-8 -*-
 import base64
 import hashlib
