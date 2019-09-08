@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/sh -x # coding: utf-8
 "exec" "`dirname $0`/.env/bin/python" "$0" "$@"
-# -*- coding: utf-8 -*-
+
 import base64
 import hashlib
 import hmac
