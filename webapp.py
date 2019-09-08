@@ -1,4 +1,5 @@
-#!/bin/sh -x # coding: utf-8
+#!/bin/sh
+# coding: utf8
 "exec" "`dirname $0`/.env/bin/python" "$0" "$@"
 
 import base64
