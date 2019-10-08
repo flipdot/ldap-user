@@ -2,7 +2,7 @@ asn1crypto==0.24.0
 cffi==1.12.3
 Click==7.0
 cryptography==2.7
-ecdsa==0.13.2
+ecdsa==0.13.3
 email==4.0.2
 enum34==1.1.6
 Flask==1.1.1
