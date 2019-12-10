@@ -311,7 +311,9 @@ def ssh_keys():
         if 'is_member' not in user[1]['meta'] or not user[1]['meta']['is_member']:
             continue
         for key in user[1]['sshPublicKey']:
-            ssh_keys.append(key + " " + user[1]['cn'][0])
+            cleanuser = re.sub(r'[^a-zA-Z0-9]', '', user[1]['cn'][0])
+            command = 'command="/home/door/door.py ' + cleanuser + '"'
+            ssh_keys.append(command + " " + key + " " + cleanuser)
     return Response('\n'.join(ssh_keys)+'\n', mimetype='text/plain')
 
 
