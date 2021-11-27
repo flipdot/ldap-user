@@ -15,4 +15,3 @@ EMAIL = "my@email.org"
 
 DEBUG=True
 STAGING=True
-HTTPS=False

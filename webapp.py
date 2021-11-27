@@ -14,7 +14,6 @@ from flask import Flask, session, redirect, url_for, request, render_template, \
 
 import notification
 from LdapForm import *
-from acme_python import acme
 from flipdotuser import *
 
 reload(sys)
@@ -340,13 +339,8 @@ if __name__ == '__main__':
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
 
-    if config.HTTPS:
-        tls = acme.ACME(app, staging=config.STAGING)
     app.secret_key = config.SECRET
     app.run(port=config.PORT, debug=config.DEBUG)
-    if config.HTTPS:
-        tls.stop()
-        tls.thread.join()
 
 
 class Error(Exception):
