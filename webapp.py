@@ -5,9 +5,8 @@
 import base64
 import hashlib
 import hmac
-import sys
 import time
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
@@ -16,10 +15,9 @@ import notification
 from LdapForm import *
 from flipdotuser import *
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 app = Flask(__name__)
+
 
 @app.route('/')
 def index():
@@ -42,7 +40,7 @@ def user():
             return render_template('index.html', form=form, user=data)
 
         data['sn'][0] = form.sammyNick.data.encode('utf8', 'ignore')
-        data['uid'][0] = form.uid.data.encode('utf8', 'ignore')
+        data['uid'][0] = form.uid.data
         data.setdefault('mail', [''])[0] = (form.mail.data.encode('utf8', 'ignore'))
 
         data['sshPublicKey'] = [x.entry.data.encode('utf8', 'ignore') for x in form.sshKeys if len(x.entry.data) > 0]
@@ -103,6 +101,7 @@ def user():
     form.drink_notification.data = data['meta']['drink_notification']
     return render_template('index.html', form=form, user=data)
 
+
 @app.route('/user/set_member', methods=['POST'])
 def set_admin():
     user_uid = request.form.get('uid')
@@ -124,6 +123,7 @@ def set_admin():
         user_data['meta']['is_admin'] = is_admin == 'true'
     FlipdotUser().setuserdata(user_dn, user_data, {})
     return redirect(url_for('list'))
+
 
 def remove_deleted_entry(form_list):
     tmp = []
@@ -155,12 +155,12 @@ def login():
             token = request.args.get('token')
             dn, date, digest = token.split('|')
             if float(date) + 60*60*24 < time.time():
-                print "expired login token: %s" % (date, time.time())
+                print(f"expired login token: {float(date)} {time.time()}")
                 return render_template("error.html", message="Invalid login token")
             digest_raw = base64.decodestring(digest)
             dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
             if hmac.compare_digest(dn_hmac, digest_raw):
-                print 'success'
+                print('success')
                 session['username'] = dn
                 session['logged_in_via'] = 'token'
                 form = PasswdForm(request.form)
@@ -171,9 +171,10 @@ def login():
                 return render_template("error.html", message="Invalid login token")
         except Exception as e:
             logging.warn(e)
-            print e
+            print(e)
             pass
     return redirect(url_for('index'))
+
 
 @app.route('/reset_password', methods=['POST'])
 def reset_password():
@@ -190,6 +191,7 @@ def reset_password():
 
     return redirect(url_for('user'))
 
+
 @app.route('/forgot_password', methods=['POST'])
 def forgot_password():
     if request.method != 'POST':
@@ -198,7 +200,7 @@ def forgot_password():
     uid = request.form.get('uid', '')
     uid = ldap.filter.escape_filter_chars(uid)
 
-    dn = 'cn=%s,ou=members,dc=flipdot,dc=org' % uid
+    dn = f'cn={uid},ou=members,dc=flipdot,dc=org'
     try:
         ret = FlipdotUser().getuser(dn)
         if not ret:
@@ -208,7 +210,7 @@ def forgot_password():
         return render_template("error.html", message="You triggered an error: " + str(e))
     if not mail:
         return render_template("error.html", message="No email address found")
-    print "Resetting password for %s (%s)" % (uid, mail)
+    print(f"Resetting password for {uid} {mail}")
     date = str(time.time())
     dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
     dn_signed = dn + "|" + date + "|" + base64.encodestring(dn_hmac).strip()
@@ -217,8 +219,9 @@ def forgot_password():
     notification.send_notification(mail,
                                    "[flipdot-noti] Passwort-Reset",
                                    msg)
-    print msg
+    print(msg)
     return render_template("error.html", message="You should have gotten a mail.")
+
 
 @app.route('/logout')
 def logout():
@@ -232,6 +235,7 @@ def list():
     user = ldap.getuser(session['username'])
     user_list = ldap.get_all_users()
     return render_template('list.html', users=user_list, login_user=user)
+
 
 @app.route('/user/impersonate', methods=["GET"])
 def impersonate():
@@ -253,6 +257,7 @@ def impersonate():
     session['username'] = user
     return redirect('/')
 
+
 @app.route('/add', methods=['POST', 'GET'])
 def add():
     form = LdapForm(request.form)
@@ -264,6 +269,7 @@ def add():
         return redirect(url_for('list'))
 
     return render_template('add.html', form=form)
+
 
 @app.route('/user/<uid>', methods=['DELETE'])
 def delete(uid):
@@ -286,6 +292,7 @@ def get(list, index, default=''):
     except IndexError:
         return default
 
+
 @app.route('/system/who_is_in_config')
 def who_is_in_config():
     users = FlipdotUser().get_all_users()
@@ -299,6 +306,7 @@ def who_is_in_config():
             mac = mac.replace('-', ':').strip()
             macs.append("s/%s/%s/i" % (mac, sammyNick))
     return Response('\n'.join(macs)+'\n', mimetype='text/plain')
+
 
 @app.route('/system/ssh_keys')
 def ssh_keys():
@@ -345,6 +353,7 @@ if __name__ == '__main__':
 
 class Error(Exception):
     pass
+
 
 class FrontendError(Error):
 

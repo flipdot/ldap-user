@@ -1,6 +1,6 @@
 from wtforms import Form, StringField, PasswordField, FieldList, SubmitField, \
-    validators, FormField, ValidationError, SelectField, IntegerField
-from wtforms.fields.html5 import EmailField
+    validators, FormField, ValidationError, SelectField, IntegerField, EmailField
+
 from sshpubkeys import SSHKey, InvalidKeyException
 from wtforms.validators import InputRequired
 
@@ -16,6 +16,7 @@ def ssh_key_check(form, field):
 class ListSSHForm(Form):
     entry = StringField("SSHPublicKey", [InputRequired(), ssh_key_check])
     delete = SubmitField('Delete')
+
 
 class ListMacForm(Form):
     entry = StringField("MAC-Address")

@@ -1,5 +1,4 @@
 import json
-
 import ldap
 import ldap.modlist as modlist
 import ldap.filter
@@ -8,6 +7,7 @@ import re
 
 import config
 from webapp import FrontendError
+
 
 '''
 If you are generating the LDAP filter dynamically (or letting users specify the filter),
@@ -33,7 +33,7 @@ class FlipdotUser:
             con.unbind()
             return True, dn
         except ldap.INVALID_CREDENTIALS:
-            print "invalid"
+            print("invalid")
             return False, None
         except Exception as e:
             raise e
@@ -55,7 +55,7 @@ class FlipdotUser:
                     meta = meta_o
             except:
                 pass
-        for key, value in default_meta.iteritems():
+        for key, value in default_meta.items():
             if not key in meta:
                 meta[key] = value
         return meta
@@ -73,10 +73,11 @@ class FlipdotUser:
         users = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
         con.unbind()
 
-        for user in users:
-            user[1]['meta'] = self.get_meta(user[1])
+        for _dn, user in users:
+            for key, val in user.items():
+                user[key] = [x.decode() for x in val]
+            user['meta'] = self.get_meta(user)
         return users
-
 
     def getuser(self, uid):
         r = re.match("cn=(.*),ou=.*", uid)
@@ -143,7 +144,6 @@ class FlipdotUser:
         attrs['objectclass'] = ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
                                 'person', 'posixAccount', 'ieee802Device']
         return attrs
-
 
     def createUser(self, uid, sammyNick, mail, pwd):
         new_uid = self.get_new_uid()
