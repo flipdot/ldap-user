@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI ldap-user instance
+After=network.target
+
+[Service]
+User=ldapapp
+Group=www-data
+WorkingDirectory=/home/ldapapp/ldap-user
+Environment="PATH=/home/ldapapp/ldap-user/venv/bin"
+ExecStart=/home/ldapapp/ldap-user/venv/bin/uwsgi --ini ldap-user.ini
+
+[Install]
+WantedBy=multi-user.target
