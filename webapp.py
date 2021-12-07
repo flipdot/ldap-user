@@ -17,6 +17,7 @@ from flipdotuser import *
 
 
 app = Flask(__name__)
+app.secret_key = config.SECRET
 
 
 @app.route('/')
@@ -347,7 +348,6 @@ if __name__ == '__main__':
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
 
-    app.secret_key = config.SECRET
     app.run(port=config.PORT, debug=config.DEBUG)
 
 
