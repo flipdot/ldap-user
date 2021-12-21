@@ -16,7 +16,7 @@ then you may want to use the escape_filter_chars() and filter_format() functions
 class FlipdotUser:
 
     def connect(self, dn, pw):
-        from webapp import FrontendError
+        from .webapp import FrontendError
         try:
             #ldap.set_option(ldap.OPT_DEBUG_LEVEL, 4095)
             con = ldap.initialize(config.LDAP_HOST, trace_level=0)
