@@ -158,8 +158,8 @@ def login():
             if float(date) + 60*60*24 < time.time():
                 print(f"expired login token: {float(date)} {time.time()}")
                 return render_template("error.html", message="Invalid login token")
-            digest_raw = base64.decodestring(digest)
-            dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
+            digest_raw = base64.b64decode(digest.encode()).decode()
+            dn_hmac = hmac.new(config.SECRET.encode(), (dn+date).encode(), hashlib.sha256).digest()
             if hmac.compare_digest(dn_hmac, digest_raw):
                 print('success')
                 session['username'] = dn
@@ -213,8 +213,8 @@ def forgot_password():
         return render_template("error.html", message="No email address found")
     print(f"Resetting password for {uid} {mail}")
     date = str(time.time())
-    dn_hmac = hmac.new(config.SECRET, dn+date, hashlib.sha256).digest()
-    dn_signed = dn + "|" + date + "|" + base64.encodestring(dn_hmac).strip()
+    dn_hmac = hmac.new(config.SECRET.encode(), (dn+date).encode(), hashlib.sha256).digest()
+    dn_signed = dn + "|" + date + "|" + base64.b64encode(dn_hmac).decode().strip()
     msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
           "http://ldapapp.fd/login?%s\n" % urlencode({'token': dn_signed})
     notification.send_notification(mail,
@@ -321,7 +321,8 @@ def ssh_keys():
         for key in user[1]['sshPublicKey']:
             cleanuser = re.sub(r'[^a-zA-Z0-9]', '', user[1]['cn'][0])
             command = 'command="/home/door/door.py ' + cleanuser + '"'
-            ssh_keys.append(command + " " + key + " " + cleanuser)
+            #ssh_keys.append(command + " " + key + " " + cleanuser)
+            ssh_keys.append(key + " " + cleanuser)
     return Response('\n'.join(ssh_keys)+'\n', mimetype='text/plain')
 
 

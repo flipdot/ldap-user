@@ -100,7 +100,7 @@ class FlipdotUser:
 
         add_object_classes = []
         for c in all_classes['objectclass']:
-          if not c in user[1]['objectClass']:
+          if not c.decode() in user[1]['objectClass']:
             add_object_classes.append(c)
 
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
@@ -141,26 +141,35 @@ class FlipdotUser:
         con.delete_s(dn)
 
     def ensure_object_classes(self, attrs):
-        attrs['objectclass'] = ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
-                                'person', 'posixAccount', 'ieee802Device']
+        attrs['objectclass'] = [x.encode() for x in ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
+                                'person', 'posixAccount', 'ieee802Device']]
         return attrs
 
     def createUser(self, uid, sammyNick, mail, pwd):
         new_uid = self.get_new_uid()
         con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
 
-        dn = config.LDAP_USER_DN.format(ldap.filter.escape_filter_chars(sammyNick))
+        # Calling .decode() fixed fuckups with strings. Nobody knows how it was introduced :(
+
+        dn = config.LDAP_USER_DN.format(ldap.filter.escape_filter_chars(sammyNick.decode()))
 
         attrs = {}
         self.ensure_object_classes(attrs)
-        attrs['uid'] = ldap.filter.escape_filter_chars(uid)
-        attrs['sn'] = ldap.filter.escape_filter_chars(sammyNick)
-        attrs['mail'] = ldap.filter.escape_filter_chars(mail)
-        attrs['uidNumber'] = str(new_uid)
-        attrs['gidNumber'] = config.LDAP_MEMBER_GID
-        attrs['homeDirectory'] = ldap.filter.escape_filter_chars('/home/{:s}'.format(uid))
+        attrs['uid'] = ldap.filter.escape_filter_chars(uid.decode()).encode()
+        attrs['sn'] = ldap.filter.escape_filter_chars(sammyNick.decode()).encode()
+        attrs['mail'] = ldap.filter.escape_filter_chars(mail.decode()).encode()
+        attrs['uidNumber'] = str(new_uid).encode()
+        attrs['gidNumber'] = config.LDAP_MEMBER_GID.encode()
+        attrs['homeDirectory'] = ldap.filter.escape_filter_chars('/home/{:s}'.format(uid.decode())).encode()
 
         ldif = modlist.addModlist(attrs)
+        print(ldif)
+        print(type(ldif))
+        print([
+            type(f)
+            for e in ldif
+            for f in e
+        ])
 
         con.add_s(dn, ldif)
         con.passwd_s(dn, None, pwd)
