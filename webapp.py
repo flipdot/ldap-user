@@ -217,7 +217,7 @@ def forgot_password():
     dn_hmac = hmac.new(config.SECRET.encode(), (dn+date).encode(), hashlib.sha256).digest()
     dn_signed = dn + "|" + date + "|" + base64.b64encode(dn_hmac).decode().strip()
     msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
-          "http://%s/login?%s\n" % (config.DOMAIN, urlencode({'token': dn_signed}))
+          "https://%s/login?%s\n" % (config.DOMAIN, urlencode({'token': dn_signed}))
     notification.send_notification(mail,
                                    "[flipdot-noti] Passwort-Reset",
                                    msg)
