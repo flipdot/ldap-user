@@ -7,6 +7,7 @@ import hashlib
 import hmac
 import time
 from urllib.parse import urlencode
+import logging
 
 from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
@@ -158,7 +159,7 @@ def login():
             if float(date) + 60*60*24 < time.time():
                 print(f"expired login token: {float(date)} {time.time()}")
                 return render_template("error.html", message="Invalid login token")
-            digest_raw = base64.b64decode(digest.encode()).decode()
+            digest_raw = base64.b64decode(digest.encode())
             dn_hmac = hmac.new(config.SECRET.encode(), (dn+date).encode(), hashlib.sha256).digest()
             if hmac.compare_digest(dn_hmac, digest_raw):
                 print('success')
@@ -216,7 +217,7 @@ def forgot_password():
     dn_hmac = hmac.new(config.SECRET.encode(), (dn+date).encode(), hashlib.sha256).digest()
     dn_signed = dn + "|" + date + "|" + base64.b64encode(dn_hmac).decode().strip()
     msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
-          "http://ldapapp.fd/login?%s\n" % urlencode({'token': dn_signed})
+          "http://%s/login?%s\n" % (config.DOMAIN, urlencode({'token': dn_signed}))
     notification.send_notification(mail,
                                    "[flipdot-noti] Passwort-Reset",
                                    msg)
