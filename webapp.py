@@ -13,8 +13,8 @@ from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
 
 import notification
-from LdapForm import *
-from flipdotuser import *
+from .LdapForm import *
+from .flipdotuser import *
 
 
 app = Flask(__name__)
