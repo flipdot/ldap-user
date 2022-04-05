@@ -324,6 +324,19 @@ def ssh_keys():
     return Response('\n'.join(ssh_keys)+'\n', mimetype='text/plain')
 
 
+@app.route('/system/rfid_keys')
+def rfid_keys():
+    users = FlipdotUser().get_all_users()
+    rfid_keys = []
+    for user in users:
+        if 'employeeNumber' not in user[1]:
+            continue
+        if 'is_member' not in user[1]['meta'] or not user[1]['meta']['is_member']:
+            continue
+        rfid_keys.append(user[1]['employeeNumber'][0])
+    return Response('\n'.join(rfid_keys)+'\n', mimetype='text/plain')
+
+
 @app.route('/system/who_is_hue')
 def who_is_hue():
     users = FlipdotUser().get_all_users()
