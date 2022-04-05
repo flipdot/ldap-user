@@ -1,5 +1,0 @@
-flask
-wtforms
-sshpubkeys
-python-ldap
-email
