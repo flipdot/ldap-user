@@ -118,6 +118,8 @@ class FlipdotUser:
         # ensure object classes
         con.modify_s(dn, modlist.modifyModlist({}, {'objectClass':add_object_classes}))
 
+        new['uid'][0] = new['uid'][0].encode('utf8')
+
         self.set_meta(new, new['meta'])
         del (new['meta'])
         del (old['meta'])
