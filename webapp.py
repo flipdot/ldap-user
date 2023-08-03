@@ -309,6 +309,20 @@ def who_is_in_config():
             macs.append("s/%s/%s/i" % (mac, sammyNick))
     return Response('\n'.join(macs)+'\n', mimetype='text/plain')
 
+@app.route('/system/who_is_in_config2')
+def who_is_in_config2():
+    users = FlipdotUser().get_all_users()
+    macs = {}
+    for user in users:
+        if 'macAddress' not in user[1]:
+            continue
+        sammyNick = user[1]['sn'][0]
+        sammyNick = sammyNick.replace('/', '\\/')
+        for mac in user[1]['macAddress']:
+            mac = mac.replace('-', ':').strip()
+            macs[mac] = sammyNick
+    return macs
+
 
 @app.route('/system/ssh_keys')
 def ssh_keys():
