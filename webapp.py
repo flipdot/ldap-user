@@ -49,7 +49,6 @@ def user():
         data['macAddress'] = [x.entry.data.encode('utf8', 'ignore') for x in form.macs if len(x.entry.data) > 0]
 
         data['meta']['drink_notification'] = form.drink_notification.data
-        data['meta']['hue'] = form.hue.data
 
         if form.password.data != '':
             old_pw = form.oldPassword.data.encode('utf8', 'ignore')
@@ -81,7 +80,6 @@ def user():
 
     form.uid.data = data['uid'][0]
     form.sammyNick.data = data['sn'][0]
-    form.hue.data = data['meta']['hue']
 
     for key in data.get('sshPublicKey', []):
         e = ListSSHForm()
@@ -352,20 +350,6 @@ def rfid_keys():
             continue
         rfid_keys.append(user[1]['employeeNumber'][0])
     return Response('\n'.join(rfid_keys)+'\n', mimetype='text/plain')
-
-
-@app.route('/system/who_is_hue')
-def who_is_hue():
-    users = FlipdotUser().get_all_users()
-    hues = []
-    for user in users:
-        if 'hue' not in user[1]['meta']:
-            continue
-        hue = user[1]['meta']['hue']
-        sammyNick = user[1]['sn'][0]
-        sammyNick = sammyNick.replace('/', '\\/')
-        hues.append("s/%s/%s/" % (sammyNick, hue))
-    return Response('\n'.join(hues)+'\n', mimetype='text/plain')
 
 
 if __name__ == '__main__':

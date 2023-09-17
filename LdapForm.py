@@ -40,9 +40,6 @@ class LdapForm(Form):
                                          ("instant and weekly", "instant and weekly"),
                                          ("never", "never"),
                                      ])
-    hue = IntegerField("Hue", default=0, validators=[
-        validators.NumberRange(min=0, max=360)
-    ])
     oldPassword = PasswordField('Old password')
     password = PasswordField('New password', [
         validators.EqualTo('confirm', message='Passwords must match')

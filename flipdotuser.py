@@ -45,7 +45,6 @@ class FlipdotUser:
             "last_drink_notification": 0,
             "is_admin": False,
             "is_member": False,
-            "hue": 0,
         }
         meta = default_meta
         if meta_str:
