@@ -25,19 +25,24 @@
             <div class="panel">
                 <h3>GECOS</h3>
                 <dl>
-                    {{ render_dl("ID number", user.uidNumber[0]) }}
+                    {{ render_dl("ID number", user.uidNumber) }}
                 </dl>
                 {{ render_field(form.uid) }}
                 {{ render_field(form.sammyNick) }}
                 {{ render_field(form.mail) }}
-                {{ render_field(form.rfid) }}
 
-                {{ render_colorselect(form.hue) }}
             </div>
 
             <div class="panel">
                 <h3>Email Settings</h3>
                 {{ render_field(form.drink_notification) }}
+            </div>
+
+            <div class="panel">
+                <h3>Password</h3>
+                {{ render_field(form.oldPassword) }}
+                {{ render_field(form.password) }}
+                {{ render_field(form.confirm) }}
             </div>
 
             <div class="panel">
@@ -63,15 +68,21 @@
             </div>
 
             <div class="panel">
-                <h3>Password</h3>
-                {{ render_field(form.oldPassword) }}
-                {{ render_field(form.password) }}
-                {{ render_field(form.confirm) }}
+                <h3>RFID-Tags</h3>
+                {% for tag in form.rfid %}
+                    {{ render_list_field(tag) }}
+                {% endfor %}
+                <button type="submit" name="submit" value="addTAG" class="btn">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                    Add Tag
+                </button>
             </div>
+
+
 
             <!-- fill up the flex layout so we have a multiple of 6 panels -->
             <!-- empty panels will be completely invisible, but make the layout work -->
-            <div class="panel"></div>
+            <!-- <div class="panel"></div> -->
 
             <button class="btn submit-btn" type="submit" name="submit" value="submit">
                 <i class="fa fa-save" aria-hidden="true"></i>
@@ -113,18 +124,8 @@
                     label.style.backgroundColor = col
                 })
     }
-    function colorSelect() {
-        const selects = document.querySelectorAll(".hue-select")
-        each(selects, (select) => {
-            select.addEventListener("input", (event) => {
-                updateColorSelect(event.target)
-            })
-            updateColorSelect(select)
-        })
-    }
     window.onload = function() {
         saveButton()
-        colorSelect()
     }
 </script>
 {% endblock %}

@@ -1,45 +1,57 @@
 import json
-import ldap
-import ldap.modlist as modlist
-import ldap.filter
+import ldap3
 import os
 import re
 
-import config
+from ldap3.core.exceptions import LDAPException, LDAPExceptionError, LDAPBindError, LDAPInvalidCredentialsResult
+from ldap3.utils.hashed import hashed
+from ldap3 import Connection, Reader, Writer, ObjectDef
 
+
+import config
+from flipdot_error import FrontendError
 
 '''
 If you are generating the LDAP filter dynamically (or letting users specify the filter),
 then you may want to use the escape_filter_chars() and filter_format() functions in the ldap.filter
  module to keep your filter strings safely escaped.
 '''
+
+
 class FlipdotUser:
 
+    def __init__(self):
+        self.con = None
+
     def connect(self, dn, pw):
-        from webapp import FrontendError
         try:
-            #ldap.set_option(ldap.OPT_DEBUG_LEVEL, 4095)
-            con = ldap.initialize(config.LDAP_HOST, trace_level=0)
-            con.simple_bind_s(dn, pw)
-        except ldap.SERVER_DOWN as e:
-            err_msg = e.message['desc']
+            server = ldap3.Server(config.LDAP_HOST)
+            con = ldap3.Connection(server, user=dn, password=pw, auto_bind='DEFAULT', raise_exceptions=True)
+            con.bind()
+
+        except LDAPExceptionError as e:
+            err_msg = str(e)
             raise FrontendError(err_msg)
+        self.con = con
         return con
 
-    def login(self, username, password):
-        dn = ldap.filter.escape_filter_chars(config.LDAP_USER_DN.format(username))
+    def login_dn(self, username, password):
+        dn = username
         try:
-            con = self.connect(dn, ldap.filter.escape_filter_chars(password))
-            con.unbind()
-            return True, dn
-        except ldap.INVALID_CREDENTIALS:
+            con = self.connect(dn, password)
+
+            return True
+        except LDAPInvalidCredentialsResult:
             print("invalid")
-            return False, None
+            return False
         except Exception as e:
             raise e
 
+    def login(self, username, password):
+        return self.login_dn(config.LDAP_USER_DN.format(username), password)
+
     def get_meta(self, data):
-        meta_str = data.get('postOfficeBox', [None])[0]
+        meta_str = data.get('postOfficeBox', [None])
         default_meta = {
             "drink_notification": "instant",  # instant, daily, weekly, never
             "last_drink_notification": 0,
@@ -55,7 +67,7 @@ class FlipdotUser:
             except:
                 pass
         for key, value in default_meta.items():
-            if not key in meta:
+            if key not in meta:
                 meta[key] = value
         return meta
 
@@ -66,118 +78,103 @@ class FlipdotUser:
         data['postOfficeBox'][0] = meta_str
 
     def getusers(self, filter):
-        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
-        base_dn = "ou=members,dc=flipdot,dc=org"
-        attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'sn', 'uidNumber', 'macAddress', 'objectclass', 'postOfficeBox', 'employeeNumber']
-        users = con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
-        con.unbind()
 
-        for _dn, user in users:
-            for key, val in user.items():
-                user[key] = [x.decode() for x in val]
+        base_dn = "ou=members,dc=flipdot,dc=org"
+        attrs = ['uid', 'sshPublicKey', 'mail', 'cn', 'sn', 'uidNumber', 'macAddress', 'objectclass', 'postOfficeBox',
+                 'employeeNumber', 'rfid', 'drinksNotification', 'isFlipdotMember']
+        users = self.con.search(search_base=base_dn,
+                                search_filter=filter,
+                                search_scope=ldap3.SUBTREE,
+                                attributes=attrs,
+                                )
+        users = self.con.response
+
+        admins = self.con.search(search_base="ou=flipmins,dc=flipdot,dc=org",
+                                search_filter='(objectClass=groupOfNames)',
+                                search_scope=ldap3.SUBTREE,
+                                attributes=['member'])
+
+        admins = self.con.response[0].get("attributes").get("member") if admins else []
+        # users = self.con.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs)
+
+        for user in users:
+            for key, val in user['attributes'].items():
+                if type(val) is list:
+                    val = [x.decode('utf-8') if type(x) is bytes else x for x in val]
+                user[key] = val
             user['meta'] = self.get_meta(user)
+            user['meta']['is_admin'] = user['dn'] in admins
         return users
 
     def getuser(self, uid):
         r = re.match("cn=(.*),ou=.*", uid)
-        search_filter = '(&(objectclass=person) (cn={:s}))'.format(ldap.filter.escape_filter_chars(r.group(1)))
+        if r:
+            uid = r.group(1)
+        search_filter = f'(&(objectclass=person) (cn={uid}))'
         user = self.getusers(search_filter)
         return user[0] if user else None
-
 
     def get_all_users(self):
         search_filter = '(&(objectclass=person))'
         users = self.getusers(search_filter)
-        reverse_users = sorted(users, key=lambda tup: int(tup[1].get('uidNumber', ['0'])[0]), reverse=True)
+        reverse_users = sorted(users, key=lambda tup: int(tup.get('uidNumber', 0)), reverse=True)
         return reverse_users
 
+    def setuserdata(self, dn, new):
+        o = ObjectDef(['inetOrgPerson', 'flipdotter'], self.con)
 
-    def setuserdata(self, dn, new, session):
-        all_classes = self.ensure_object_classes({})
-        user = self.getuser(dn)
-        old = user[1]
+        r = Reader(self.con, o, dn)
+        r.search()
 
-        add_object_classes = []
-        for c in all_classes['objectclass']:
-          if not c.decode() in user[1]['objectClass']:
-            add_object_classes.append(c)
+        w = Writer.from_cursor(r)
+        e = w[0]
 
-        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
+        change_cn = e['uid'] != new['uid']
+        for k, v in new.items():
+            e[k] = v
+        ret = e.entry_commit_changes()
+        if ret and change_cn:
+            s = ldap3.Server('ldapi:///var/run/slapd/ldapi')
+            c = Connection(s, authentication=ldap3.SASL, sasl_mechanism=ldap3.EXTERNAL, sasl_credentials='')
+            c.bind()
+            ret = ret and c.modify_dn(dn, f'cn={new["uid"]}')
+            c.unbind()
 
-        if old['uid'][0] != new['uid'][0] or old['cn'][0] != new['cn'][0] \
-                or old['uid'][0] != new['cn'][0] or old['cn'][0] != new['uid'][0]:
-            old_dn = config.LDAP_USER_DN.format(old['cn'][0])
-            new_dn = config.LDAP_USER_DN.format(new['uid'][0])
-            new_rdn = new_dn.split(',')[0]
-            new_ou = ",".join(new_dn.split(',')[1:])
-            con.rename_s(old_dn, new_rdn, new_ou)
-            dn = new_dn
-            session['username'] = dn
-
-        # ensure object classes
-        con.modify_s(dn, modlist.modifyModlist({}, {'objectClass':add_object_classes}))
-
-        new['uid'][0] = new['uid'][0].encode('utf8')
-
-        self.set_meta(new, new['meta'])
-        del (new['meta'])
-        del (old['meta'])
-        # safe new attribtes
-        ldif = modlist.modifyModlist(old, new)
-        new['meta'] = self.get_meta(new)
-
-        con.modify_s(dn, ldif)
-
-        con.unbind()
-
+        return ret
 
     def setPasswd(self, dn, old, new):
-        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
-        con.passwd_s(dn, old, new)
-        con.unbind()
-
+        self.con.extend.standard.modify_passwd(dn, old, new)
 
     def delete(self, dn):
-        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
-        con.delete_s(dn)
+        self.con.delete(dn)
 
-    def ensure_object_classes(self, attrs):
-        attrs['objectclass'] = [x.encode() for x in ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
-                                'person', 'posixAccount', 'ieee802Device']]
-        return attrs
+    def ensure_object_classes(self):
+        return ['top', 'inetOrgPerson', 'ldapPublicKey', 'organizationalPerson',
+                'person', 'posixAccount', 'ieee802Device', 'flipdotter']
+
 
     def createUser(self, uid, sammyNick, mail, pwd):
+        self.create_user(uid, sammyNick, mail, pwd)
+
+    def create_user(self, username, public_nick, mail, pwd):
         new_uid = self.get_new_uid()
-        con = self.connect(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PW)
+        dn = config.LDAP_USER_DN.format(username)
 
-        # Calling .decode() fixed fuckups with strings. Nobody knows how it was introduced :(
-
-        dn = config.LDAP_USER_DN.format(ldap.filter.escape_filter_chars(sammyNick.decode()))
-
-        attrs = {}
-        self.ensure_object_classes(attrs)
-        attrs['uid'] = ldap.filter.escape_filter_chars(uid.decode()).encode()
-        attrs['sn'] = ldap.filter.escape_filter_chars(sammyNick.decode()).encode()
-        attrs['mail'] = ldap.filter.escape_filter_chars(mail.decode()).encode()
-        attrs['uidNumber'] = str(new_uid).encode()
-        attrs['gidNumber'] = config.LDAP_MEMBER_GID.encode()
-        attrs['homeDirectory'] = ldap.filter.escape_filter_chars('/home/{:s}'.format(uid.decode())).encode()
-
-        ldif = modlist.addModlist(attrs)
-        print(ldif)
-        print(type(ldif))
-        print([
-            type(f)
-            for e in ldif
-            for f in e
-        ])
-
-        con.add_s(dn, ldif)
-        con.passwd_s(dn, None, pwd)
-        con.unbind_s()
+        return self.con.add(dn,
+                            self.ensure_object_classes(),
+                            {
+                                "uid": username,
+                                "sn": public_nick,
+                                "mail": mail,
+                                "uidNumber": str(new_uid),
+                                "gidNumber": config.LDAP_MEMBER_GID,
+                                "homeDirectory": f"/home/{username}",
+                                "userPassword": hashed(ldap3.HASHED_SHA, pwd),
+                                "isFlipdotMember": False,
+                            })
 
     def get_new_uid(self):
         users = self.get_all_users()
 
         last = users[0]
-        return int(last[1]['uidNumber'][0])+1
+        return int(last['uidNumber']) + 1

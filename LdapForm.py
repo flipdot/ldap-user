@@ -22,6 +22,10 @@ class ListMacForm(Form):
     entry = StringField("MAC-Address")
     delete = SubmitField('Delete')
 
+class ListRFIDForm(Form):
+    entry = StringField("RFID-Tag")
+    delete = SubmitField('Delete')
+
 
 class LdapForm(Form):
     uid = StringField('Username', validators=[
@@ -50,6 +54,7 @@ class LdapForm(Form):
 
     sshKeys = FieldList(FormField(ListSSHForm))
     macs = FieldList(FormField(ListMacForm))
+    rfid = FieldList(FormField(ListRFIDForm))
 
 
 class PasswdForm(Form):
