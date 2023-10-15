@@ -10,14 +10,11 @@
             <tr>
                 <th>Name</th>
                 <th>BananaNick&trade;</th>
-                {% if login_user['meta']['is_admin'] %}
-                    <th>Email</th>
-                {% endif %}
+	        <th>Email</th>
                 <th>ID number</th>
                 <th># Public SSH Keys</th>
                 <th>Member</th>
                 <th>Admin</th>
-                <th>Impersonate</th>
                 <th>Delete</th>
             </tr>
         </thead>
@@ -26,20 +23,18 @@
             <tr>
                 <td>{{ user.uid[0] }}</td>
                 <td>{{ (user.sn or [''])[0] }}</td>
-                {% if login_user['meta']['is_admin'] %}
-                    <td>{{ user.mail|join(',') }}</td>
-                {% endif %}
+	        <td>{{ user.mail|join(',') }}</td>
                 <td>
                     {{ user.uidNumber }}
                 </td>
                 <td>{{ (user.sshPublicKey|length) or '0' }}</td>
                 <td>
                     <div class="setting">
-                        <i class="fa {{ 'fa-check' if (user['meta']['is_member']) else 'fa-times' }}"></i>
+                        <i class="fa {{ 'fa-check' if (user['isFlipdotMember']) else 'fa-times' }}"></i>
                                 <form action="/user/set_member" method="POST">
                                     <input type="hidden" name="uid" value="{{ dn }}">
-                                    <button class="btn" type="submit" name="is_member" value="{{ 'false' if (user['meta']['is_member']) else 'true' }}">
-                                        <i class="fa {{ 'fa-times' if (user['meta']['is_member']) else 'fa-check'  }}"></i>
+                                    <button class="btn" type="submit" name="is_member" value="{{ 'false' if (user['isFlipdotMember']) else 'true' }}">
+                                        <i class="fa {{ 'fa-times' if (user['isFlipdotMember']) else 'fa-check'  }}"></i>
                                     </button>
                                 </form>
                     </div>
@@ -52,16 +47,6 @@
                                 <input type="hidden" name="uid" value="{{ dn }}">
                                 <button class="btn" type="submit" name="is_admin" value="{{ 'false' if (user['meta']['is_admin']) else 'true'  }}">
                                     <i class="fa {{ 'fa-times' if (user['meta']['is_admin']) else 'fa-check'  }}"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="setting">
-                            <form action="/user/impersonate" method="GET">
-                                <input type="hidden" name="user" value="{{ dn }}">
-                                <button class="btn" type="submit">
-                                    <i class="fa fa-female"></i>
                                 </button>
                             </form>
                         </div>

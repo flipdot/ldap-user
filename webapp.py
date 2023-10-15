@@ -136,11 +136,13 @@ def set_admin():
     user_uid = request.form.get('uid')
     is_member = request.form.get('is_member')
     is_admin = request.form.get('is_admin')
+    fd = FlipdotUser()
+    fd.login(session['username'], session['password'])
     if user_uid is None or (is_member is None and is_admin is None):
         return render_template("error.html", message="must supply uid and is_member/is_admin")
     try:
-        admin_dn, admin_data = FlipdotUser().getuser(session['username'])
-        user_dn, user_data = FlipdotUser().getuser(user_uid)
+        admin_data = fd.getuser(session['username'])
+        user_data = fd.getuser(user_uid)
     except FrontendError as e:
         return render_template("error.html", message=e.message)
 
@@ -148,9 +150,10 @@ def set_admin():
         return render_template("error.html", message="You must be admin")
     if is_member is not None:
         user_data['meta']['is_member'] = is_member == 'true'
+        user_data['isFlipdotMember'] = is_member == 'true'
     if is_admin is not None:
         user_data['meta']['is_admin'] = is_admin == 'true'
-    FlipdotUser().setuserdata(user_dn, user_data, {})
+    fd.setuserdata(user_data['dn'], user_data)
     return redirect(url_for('list'))
 
 

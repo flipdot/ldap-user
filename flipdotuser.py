@@ -131,7 +131,11 @@ class FlipdotUser:
 
         change_cn = e['uid'] != new['uid']
         for k, v in new.items():
-            e[k] = v
+            if k in e and v:
+                e[k] = v
+            else:
+                print(f"unknown key {k}")
+
         ret = e.entry_commit_changes()
         if ret and change_cn:
             s = ldap3.Server('ldapi:///var/run/slapd/ldapi')
