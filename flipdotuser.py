@@ -131,7 +131,7 @@ class FlipdotUser:
 
         change_cn = e['uid'] != new['uid']
         for k, v in new.items():
-            if k in e and v:
+            if k in e and not (isinstance(v, list) and not v):
                 e[k] = v
             else:
                 print(f"unknown key {k}")
