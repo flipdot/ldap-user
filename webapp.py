@@ -386,7 +386,7 @@ def ssh_keys():
 
 @app.route('/system/rfid_keys')
 def rfid_keys():
-    server = ldap3.Server("ldaps://ldap.flipdot.space")
+    server = ldap3.Server(config.LDAP_HOST)
     c = Connection(server)
     c.bind()
     c.search(search_base="ou=members,dc=flipdot,dc=org", search_filter="(&(objectClass=flipdotter))", attributes=['rfid'])
