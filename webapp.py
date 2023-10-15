@@ -389,7 +389,8 @@ def rfid_keys():
     server = ldap3.Server(config.LDAP_HOST)
     c = Connection(server)
     c.bind()
-    c.search(search_base="ou=members,dc=flipdot,dc=org", search_filter="(&(objectClass=flipdotter))", attributes=['rfid'])
+    c.search(search_base="ou=members,dc=flipdot,dc=org",
+             search_filter="(&(objectClass=flipdotter)(isFlipdotMember=TRUE))", attributes=['rfid'])
     users = c.response
     rfid_keys = []
     for user in users:
