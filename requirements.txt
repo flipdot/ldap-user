@@ -8,5 +8,5 @@ pycparser==2.21
 ldap3
 six==1.16.0
 sshpubkeys==3.3.1
-Werkzeug==2.2.3
+Werkzeug==3.0.1
 WTForms==3.0.0
