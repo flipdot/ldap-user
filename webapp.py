@@ -50,6 +50,8 @@ def index():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     form = LdapForm(request.form)
+    if 'username' not in session:
+        return redirect(url_for('index'))
     fd = FlipdotUser()
     fd.login(session['username'], session['password'])
     data = fd.getuser(session['username'])
