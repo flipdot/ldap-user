@@ -18,10 +18,26 @@ from flask import Flask, session, redirect, url_for, request, render_template, \
 import notification
 from LdapForm import *
 from flipdotuser import *
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    dsn=config.SENTRY_DSN,
+    integrations=[FlaskIntegration()]
+)
+
+app = Flask(__name__)
+
 
 app = Flask(__name__)
 app.secret_key = config.SECRET
 
+logger = logging.getLogger(__name__)
+
+@app.route("/error")
+def error():
+    logger.error("Test error was triggered")
+    return "Error triggered, checkout your monitoring"
 
 @app.route('/')
 def index():
@@ -34,12 +50,9 @@ def index():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     form = LdapForm(request.form)
-    try:
-        fd = FlipdotUser()
-        fd.login(session['username'], session['password'])
-        data = fd.getuser(session['username'])
-    except FrontendError as e:
-        return render_template("error.html", message=e.message)
+    fd = FlipdotUser()
+    fd.login(session['username'], session['password'])
+    data = fd.getuser(session['username'])
 
     if request.method == "POST" and request.form.get('submit', '') == 'submit':
         if not form.validate():
@@ -140,11 +153,8 @@ def set_admin():
     fd.login(session['username'], session['password'])
     if user_uid is None or (is_member is None and is_admin is None):
         return render_template("error.html", message="must supply uid and is_member/is_admin")
-    try:
-        admin_data = fd.getuser(session['username'])
-        user_data = fd.getuser(user_uid)
-    except FrontendError as e:
-        return render_template("error.html", message=e.message)
+    admin_data = fd.getuser(session['username'])
+    user_data = fd.getuser(user_uid)
 
     if 'is_admin' not in admin_data['meta'] or not admin_data['meta']['is_admin']:
         return render_template("error.html", message="You must be admin")
@@ -174,12 +184,8 @@ def login():
         pwd = request.form.get('password', '')
         if not uid or not pwd:
             return redirect("/", 302)
-        try:
-            fd = FlipdotUser()
-            valid = fd.login(uid, pwd)
-
-        except FrontendError as e:
-            return render_template("error.html", message=e.message)
+        fd = FlipdotUser()
+        valid = fd.login(uid, pwd)
         if valid:
             session['username'] = uid
             session['password'] = pwd
@@ -237,13 +243,10 @@ def forgot_password():
     uid = ldap.filter.escape_filter_chars(uid)
 
     dn = f'cn={uid},ou=members,dc=flipdot,dc=org'
-    try:
-        ret = FlipdotUser().getuser(dn)
-        if not ret:
-            return render_template("error.html", message="User %s not found" % uid)
-        mail = ret[1]['mail'][0]
-    except FrontendError as e:
-        return render_template("error.html", message="You triggered an error: " + str(e))
+    ret = FlipdotUser().getuser(dn)
+    if not ret:
+        return render_template("error.html", message="User %s not found" % uid)
+    mail = ret[1]['mail'][0]
     if not mail:
         return render_template("error.html", message="No email address found")
     print(f"Resetting password for {uid} {mail}")
@@ -279,17 +282,11 @@ def impersonate():
     user = request.args.get('user')
     if not user:
         return render_template("error.html", message="Not a valid user")
-    try:
-        dn, data = FlipdotUser().getuser(session['username'])
-    except FrontendError as e:
-        return render_template("error.html", message=e.message)
+    dn, data = FlipdotUser().getuser(session['username'])
     if not data['meta']['is_admin']:
         return render_template("error.html", message=u"No. 😾")
 
-    try:
-        dn_imp, data_imp = FlipdotUser().getuser(user)
-    except FrontendError as e:
-        return render_template("error.html", message=e.message)
+    dn_imp, data_imp = FlipdotUser().getuser(user)
 
     session['username'] = user
     return redirect('/')
@@ -398,6 +395,15 @@ def rfid_keys():
             for tag in user['rfid']:
                 rfid_keys.append(tag)
     return Response('\n'.join(rfid_keys) + '\n', mimetype='text/plain')
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    # if it's a FrontendError, show the message
+    if isinstance(error, FrontendError):
+        return render_template("error.html", message=error.message)
+    else:
+        return 'Internal server error. Checkout <a target="_blank" href="https://glitchtip.flipdot.org/flipdot/issues?project=3">Glitchtip</a> for more information'
 
 
 if __name__ == '__main__':
