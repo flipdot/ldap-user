@@ -147,7 +147,7 @@ class FlipdotUser:
         return ret
 
     def setPasswd(self, dn, old, new):
-        self.con.extend.standard.modify_passwd(dn, old, new)
+        self.con.extend.standard.modify_password(dn, old, new)
 
     def delete(self, dn):
         self.con.delete(dn)
