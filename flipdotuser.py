@@ -147,6 +147,7 @@ class FlipdotUser:
         return ret
 
     def setPasswd(self, dn, old, new):
+        self.login_dn(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PASSWORD)
         self.con.extend.standard.modify_password(dn, old, new)
 
     def delete(self, dn):

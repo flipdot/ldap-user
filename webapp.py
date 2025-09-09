@@ -246,8 +246,8 @@ def forgot_password():
     uid = request.form.get('uid', '')
     uid = ldap3.filter.escape_filter_chars(uid)
 
-    dn = f'cn={uid},ou=members,dc=flipdot,dc=org'
-    ret = FlipdotUser().getuser(dn)
+    fd = get_anonymous()
+    ret = fd.getuser(uid)
     if not ret:
         return render_template("error.html", message="User %s not found" % uid)
     mail = ret[1]['mail'][0]
@@ -255,6 +255,8 @@ def forgot_password():
         return render_template("error.html", message="No email address found")
     print(f"Resetting password for {uid} {mail}")
     date = str(time.time())
+
+    dn = config.LDAP_USER_DN.format(uid)
     dn_hmac = hmac.new(config.SECRET.encode(), (dn + date).encode(), hashlib.sha256).digest()
     dn_signed = dn + "|" + date + "|" + base64.b64encode(dn_hmac).decode().strip()
     msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
@@ -331,7 +333,7 @@ def delete(uid):
 
 def get_anonymous():
     fd = FlipdotUser()
-    fd.login_dn(config.LDAP_RO_USER, config.LDAP_RO_PWD)
+    fd.login_dn(config.LDAP_RO_USER, config.LDAP_RO_PASSWORD)
     return fd
 
 
@@ -353,8 +355,7 @@ def who_is_in_config():
 
 @app.route('/system/who_is_in_config2')
 def who_is_in_config2():
-    fd = FlipdotUser()
-    fd.login_dn(config.LDAP_RO_USER, config.LDAP_RO_PWD)
+    fd = get_anonymous()
     users = fd.get_all_users()
     macs = {}
     for user in users:
