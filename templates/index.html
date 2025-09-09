@@ -8,7 +8,7 @@
             Here you can edit your account.
         </h2>
         <h3>
-            Member Status: <i class="fa {{ 'fa-check' if (user['meta']['is_member']) else 'fa-times' }}"></i>
+            Member Status: <i class="fa {{ 'fa-check' if (user['isFlipdotMember']) else 'fa-times' }}"></i>
         </h3>
 
         {% from "_formhelper.html" import render_field %}
