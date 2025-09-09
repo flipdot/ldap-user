@@ -263,7 +263,7 @@ def forgot_password():
                                    "[flipdot-noti] Passwort-Reset",
                                    msg)
     print(msg)
-    return render_template("error.html", message="You should have gotten a mail.")
+    return render_template("success.html", message="You should have gotten a mail.")
 
 
 @app.route('/logout')
