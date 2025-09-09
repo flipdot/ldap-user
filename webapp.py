@@ -5,6 +5,7 @@
 import base64
 import hashlib
 import hmac
+import re
 import time
 from urllib.parse import urlencode
 
@@ -15,9 +16,12 @@ import logging
 from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
 
+import ldap3
+from ldap3.core.exceptions import LDAPException
+
 import notification
-from LdapForm import *
-from flipdotuser import *
+from LdapForm import LdapForm, ListSSHForm, ListMacForm, ListRFIDForm, PasswdForm
+from flipdotuser import FlipdotUser, Connection
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -41,7 +45,7 @@ def error():
 
 @app.route('/')
 def index():
-    if 'username' in session:
+    if 'username' in session and 'password' in session:
         return redirect(url_for('user'))
     else:
         return render_template('login.html', username=None)
@@ -50,7 +54,7 @@ def index():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     form = LdapForm(request.form)
-    if 'username' not in session:
+    if 'username' not in session or 'password' not in session:
         return redirect(url_for('index'))
     fd = FlipdotUser()
     fd.login(session['username'], session['password'])
@@ -233,6 +237,12 @@ def reset_password():
         print("update pw")
         FlipdotUser().setPasswd(session['username'], None, new_pw)
 
+        r = re.match("cn=(.*),ou=.*", session['username'])
+        if r:
+            session['username'] = r.group(1)
+
+        session['password'] = new_pw
+
     return redirect(url_for('user'))
 
 
@@ -242,10 +252,10 @@ def forgot_password():
         return redirect(url_for('index'))
 
     uid = request.form.get('uid', '')
-    uid = ldap.filter.escape_filter_chars(uid)
+    uid = ldap3.filter.escape_filter_chars(uid)
 
-    dn = f'cn={uid},ou=members,dc=flipdot,dc=org'
-    ret = FlipdotUser().getuser(dn)
+    fd = get_anonymous()
+    ret = fd.getuser(uid)
     if not ret:
         return render_template("error.html", message="User %s not found" % uid)
     mail = ret[1]['mail'][0]
@@ -253,6 +263,8 @@ def forgot_password():
         return render_template("error.html", message="No email address found")
     print(f"Resetting password for {uid} {mail}")
     date = str(time.time())
+
+    dn = config.LDAP_USER_DN.format(uid)
     dn_hmac = hmac.new(config.SECRET.encode(), (dn + date).encode(), hashlib.sha256).digest()
     dn_signed = dn + "|" + date + "|" + base64.b64encode(dn_hmac).decode().strip()
     msg = "Mit diesem Link kannst du dich einloggen und dein Passwort aendern:\n" \
@@ -261,7 +273,7 @@ def forgot_password():
                                    "[flipdot-noti] Passwort-Reset",
                                    msg)
     print(msg)
-    return render_template("error.html", message="You should have gotten a mail.")
+    return render_template("success.html", message="You should have gotten a mail.")
 
 
 @app.route('/logout')
@@ -329,7 +341,7 @@ def delete(uid):
 
 def get_anonymous():
     fd = FlipdotUser()
-    fd.login_dn(config.LDAP_RO_USER, config.LDAP_RO_PWD)
+    fd.login_dn(config.LDAP_RO_USER, config.LDAP_RO_PASSWORD)
     return fd
 
 
@@ -351,8 +363,7 @@ def who_is_in_config():
 
 @app.route('/system/who_is_in_config2')
 def who_is_in_config2():
-    fd = FlipdotUser()
-    fd.login_dn(config.LDAP_RO_USER, config.LDAP_RO_PWD)
+    fd = get_anonymous()
     users = fd.get_all_users()
     macs = {}
     for user in users:
@@ -377,7 +388,7 @@ def ssh_keys():
         if user.get("isFlipdotMember", False):
             for key in user['sshPublicKey']:
                 cleanuser = re.sub(r'[^a-zA-Z0-9]', '', user['cn'][0])
-                command = 'command="/home/door/door.py ' + cleanuser + '"'
+                # command = 'command="/home/door/door.py ' + cleanuser + '"'
                 # ssh_keys.append(command + " " + key + " " + cleanuser)
                 ssh_keys.append(key + " " + cleanuser)
     return Response('\n'.join(ssh_keys) + '\n', mimetype='text/plain')

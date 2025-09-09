@@ -15,21 +15,19 @@ def send_notification_newthread(to_address, subject, message):
     send_thread.start()
 
 def send_notification(to_address, subject, message):
+    if not hasattr(config, 'MAIL_PASSWORD'):
+        print("Error: MAIL_PASSWORD not set")
+        return
+
     msg = MIMEText(message,_charset='utf-8')
-
-    fromMail = "flipdot-noti@vega.uberspace.de"
-
     msg['Subject'] = subject
-    msg['From'] = fromMail
+    msg['From'] = config.MAIL_FROM
     msg['To'] = to_address
 
-    if not 'MAIL_PW' in dir(config):
-        print("Error: MAIL_PW not set")
-        return
-    s = smtplib.SMTP('vega.uberspace.de')
-    s.connect(host='vega.uberspace.de', port=587)
+    s = smtplib.SMTP(config.MAIL_HOST)
+    s.connect(host=config.MAIL_HOST, port=config.MAIL_PORT)
     s.ehlo()
     s.starttls()
-    s.login(user=fromMail, password=config.MAIL_PW)
-    s.sendmail(fromMail, [to_address], msg.as_string())
+    s.login(user=config.MAIL_FROM, password=config.MAIL_PASSWORD)
+    s.sendmail(config.MAIL_FROM, [to_address], msg.as_string())
     s.quit()

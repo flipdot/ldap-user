@@ -1,9 +1,8 @@
 import json
 import ldap3
-import os
 import re
 
-from ldap3.core.exceptions import LDAPException, LDAPExceptionError, LDAPBindError, LDAPInvalidCredentialsResult
+from ldap3.core.exceptions import LDAPExceptionError, LDAPInvalidCredentialsResult
 from ldap3.utils.hashed import hashed
 from ldap3 import Connection, Reader, Writer, ObjectDef
 
@@ -26,19 +25,16 @@ class FlipdotUser:
     def connect(self, dn, pw):
         try:
             server = ldap3.Server(config.LDAP_HOST)
-            con = ldap3.Connection(server, user=dn, password=pw, auto_bind='DEFAULT', raise_exceptions=True)
-            con.bind()
+            self.con = ldap3.Connection(server, user=dn, password=pw, auto_bind='DEFAULT', raise_exceptions=True)
+            self.con.bind()
 
         except LDAPExceptionError as e:
             err_msg = str(e)
             raise FrontendError(err_msg)
-        self.con = con
-        return con
 
-    def login_dn(self, username, password):
-        dn = username
+    def login_dn(self, dn, password):
         try:
-            con = self.connect(dn, password)
+            self.connect(dn, password)
 
             return True
         except LDAPInvalidCredentialsResult:
@@ -147,6 +143,7 @@ class FlipdotUser:
         return ret
 
     def setPasswd(self, dn, old, new):
+        self.login_dn(config.LDAP_ADMIN_DN, config.LDAP_ADMIN_PASSWORD)
         self.con.extend.standard.modify_password(dn, old, new)
 
     def delete(self, dn):
