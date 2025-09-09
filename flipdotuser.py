@@ -26,19 +26,16 @@ class FlipdotUser:
     def connect(self, dn, pw):
         try:
             server = ldap3.Server(config.LDAP_HOST)
-            con = ldap3.Connection(server, user=dn, password=pw, auto_bind='DEFAULT', raise_exceptions=True)
-            con.bind()
+            self.con = ldap3.Connection(server, user=dn, password=pw, auto_bind='DEFAULT', raise_exceptions=True)
+            self.con.bind()
 
         except LDAPExceptionError as e:
             err_msg = str(e)
             raise FrontendError(err_msg)
-        self.con = con
-        return con
 
-    def login_dn(self, username, password):
-        dn = username
+    def login_dn(self, dn, password):
         try:
-            con = self.connect(dn, password)
+            self.connect(dn, password)
 
             return True
         except LDAPInvalidCredentialsResult:
