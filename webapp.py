@@ -15,6 +15,8 @@ import logging
 from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
 
+import ldap3
+
 import notification
 from LdapForm import *
 from flipdotuser import *
@@ -242,7 +244,7 @@ def forgot_password():
         return redirect(url_for('index'))
 
     uid = request.form.get('uid', '')
-    uid = ldap.filter.escape_filter_chars(uid)
+    uid = ldap3.filter.escape_filter_chars(uid)
 
     dn = f'cn={uid},ou=members,dc=flipdot,dc=org'
     ret = FlipdotUser().getuser(dn)
