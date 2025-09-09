@@ -1,9 +1,8 @@
 import json
 import ldap3
-import os
 import re
 
-from ldap3.core.exceptions import LDAPException, LDAPExceptionError, LDAPBindError, LDAPInvalidCredentialsResult
+from ldap3.core.exceptions import LDAPExceptionError, LDAPInvalidCredentialsResult
 from ldap3.utils.hashed import hashed
 from ldap3 import Connection, Reader, Writer, ObjectDef
 

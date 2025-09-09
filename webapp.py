@@ -16,10 +16,11 @@ from flask import Flask, session, redirect, url_for, request, render_template, \
     Response
 
 import ldap3
+from ldap3.core.exceptions import LDAPException
 
 import notification
-from LdapForm import *
-from flipdotuser import *
+from LdapForm import LdapForm, ListSSHForm, ListMacForm, ListRFIDForm, PasswdForm
+from flipdotuser import FlipdotUser, Connection
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -380,7 +381,7 @@ def ssh_keys():
         if user.get("isFlipdotMember", False):
             for key in user['sshPublicKey']:
                 cleanuser = re.sub(r'[^a-zA-Z0-9]', '', user['cn'][0])
-                command = 'command="/home/door/door.py ' + cleanuser + '"'
+                # command = 'command="/home/door/door.py ' + cleanuser + '"'
                 # ssh_keys.append(command + " " + key + " " + cleanuser)
                 ssh_keys.append(key + " " + cleanuser)
     return Response('\n'.join(ssh_keys) + '\n', mimetype='text/plain')
