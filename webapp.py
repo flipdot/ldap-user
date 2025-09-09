@@ -5,6 +5,7 @@
 import base64
 import hashlib
 import hmac
+import re
 import time
 from urllib.parse import urlencode
 
@@ -44,7 +45,7 @@ def error():
 
 @app.route('/')
 def index():
-    if 'username' in session:
+    if 'username' in session and 'password' in session:
         return redirect(url_for('user'))
     else:
         return render_template('login.html', username=None)
@@ -53,7 +54,7 @@ def index():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     form = LdapForm(request.form)
-    if 'username' not in session:
+    if 'username' not in session or 'password' not in session:
         return redirect(url_for('index'))
     fd = FlipdotUser()
     fd.login(session['username'], session['password'])
@@ -235,6 +236,12 @@ def reset_password():
         new_pw = form.password.data.encode('utf8', 'ignore')
         print("update pw")
         FlipdotUser().setPasswd(session['username'], None, new_pw)
+
+        r = re.match("cn=(.*),ou=.*", session['username'])
+        if r:
+            session['username'] = r.group(1)
+
+        session['password'] = new_pw
 
     return redirect(url_for('user'))
 
