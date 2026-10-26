@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Check pyproject and lockfile freshness
+        run: poetry check --lock
+      - name: Install dependencies
+        run: poetry install --no-root
+      - name: Import smoke test
+        run: |
+          cp config-example.py config.py
+          poetry run python -c "import webapp"
+      - name: Compile
+        run: poetry run python -m compileall -q __init__.py LdapForm.py config-example.py flipdot_error.py flipdotuser.py notification.py sync_fields.py webapp.py
