@@ -1,6 +1,5 @@
 import json
 import ldap3
-import re
 
 from ldap3.core.exceptions import LDAPExceptionError, LDAPInvalidCredentialsResult
 from ldap3.utils.hashed import hashed
@@ -15,6 +14,15 @@ If you are generating the LDAP filter dynamically (or letting users specify the 
 then you may want to use the escape_filter_chars() and filter_format() functions in the ldap.filter
  module to keep your filter strings safely escaped.
 '''
+
+
+def extract_cn(uid):
+    """Return the value of the leading cn= attribute of a DN, or the input unchanged."""
+    if uid.startswith("cn="):
+        name, sep, rest = uid[3:].partition(",")
+        if name and sep and rest.startswith("ou="):
+            return name
+    return uid
 
 
 class FlipdotUser:
@@ -103,9 +111,7 @@ class FlipdotUser:
         return users
 
     def getuser(self, uid):
-        r = re.match("cn=([^,]+),ou=", uid)
-        if r:
-            uid = r.group(1)
+        uid = extract_cn(uid)
         search_filter = f'(&(objectclass=person) (cn={uid}))'
         user = self.getusers(search_filter)
         return user[0] if user else None

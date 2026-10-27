@@ -21,7 +21,7 @@ from ldap3.core.exceptions import LDAPException
 
 import notification
 from LdapForm import LdapForm, ListSSHForm, ListMacForm, ListRFIDForm, PasswdForm
-from flipdotuser import FlipdotUser, Connection
+from flipdotuser import FlipdotUser, Connection, extract_cn
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -236,9 +236,7 @@ def reset_password():
         print("update pw")
         FlipdotUser().setPasswd(session['username'], None, new_pw)
 
-        r = re.match("cn=([^,]+),ou=", session['username'])
-        if r:
-            session['username'] = r.group(1)
+        session['username'] = extract_cn(session['username'])
 
         session['password'] = new_pw
 
