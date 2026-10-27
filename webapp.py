@@ -236,7 +236,7 @@ def reset_password():
         print("update pw")
         FlipdotUser().setPasswd(session['username'], None, new_pw)
 
-        r = re.match("cn=([^,]+),ou=.*", session['username'])
+        r = re.match("cn=([^,]+),ou=", session['username'])
         if r:
             session['username'] = r.group(1)
 
