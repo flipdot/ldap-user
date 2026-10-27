@@ -162,7 +162,7 @@ def set_admin():
     admin_data = fd.getuser(session['username'])
     if 'is_admin' not in admin_data['meta'] or not admin_data['meta']['is_admin']:
         return render_template("error.html", message="You must be admin")
-    user_data = fd.getuser(ldap3.filter.escape_filter_chars(user_uid))
+    user_data = fd.getuser(user_uid)
     if is_member is not None:
         user_data['meta']['is_member'] = is_member == 'true'
         user_data['isFlipdotMember'] = is_member == 'true'

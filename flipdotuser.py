@@ -111,7 +111,7 @@ class FlipdotUser:
         return users
 
     def getuser(self, uid):
-        uid = extract_cn(uid)
+        uid = ldap3.filter.escape_filter_chars(extract_cn(uid))
         search_filter = f'(&(objectclass=person) (cn={uid}))'
         user = self.getusers(search_filter)
         return user[0] if user else None
