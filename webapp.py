@@ -160,10 +160,9 @@ def set_admin():
     if user_uid is None or (is_member is None and is_admin is None):
         return render_template("error.html", message="must supply uid and is_member/is_admin")
     admin_data = fd.getuser(session['username'])
-    user_data = fd.getuser(user_uid)
-
     if 'is_admin' not in admin_data['meta'] or not admin_data['meta']['is_admin']:
         return render_template("error.html", message="You must be admin")
+    user_data = fd.getuser(ldap3.filter.escape_filter_chars(user_uid))
     if is_member is not None:
         user_data['meta']['is_member'] = is_member == 'true'
         user_data['isFlipdotMember'] = is_member == 'true'
@@ -237,7 +236,7 @@ def reset_password():
         print("update pw")
         FlipdotUser().setPasswd(session['username'], None, new_pw)
 
-        r = re.match("cn=(.*),ou=.*", session['username'])
+        r = re.match("cn=([^,]+),ou=.*", session['username'])
         if r:
             session['username'] = r.group(1)
 
@@ -331,11 +330,13 @@ def delete(uid):
     try:
         fd = FlipdotUser()
         fd.login(session['username'], session['password'])
-        #admin_data = fd.getuser(session['username'])
-        #_ = fd.getuser(uid)
+        admin_data = fd.getuser(session['username'])
+        if 'is_admin' not in admin_data['meta'] or not admin_data['meta']['is_admin']:
+            return render_template("error.html", message="You must be admin")
         fd.delete(uid)
     except LDAPException as e:
-        return "Error: " + str(e)
+        logger.error("delete %s failed: %s", uid, e)
+        return render_template("error.html", message="Deletion failed")
     return "OK"
 
 

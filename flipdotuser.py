@@ -103,7 +103,7 @@ class FlipdotUser:
         return users
 
     def getuser(self, uid):
-        r = re.match("cn=(.*),ou=.*", uid)
+        r = re.match("cn=([^,]+),ou=.*", uid)
         if r:
             uid = r.group(1)
         search_filter = f'(&(objectclass=person) (cn={uid}))'
